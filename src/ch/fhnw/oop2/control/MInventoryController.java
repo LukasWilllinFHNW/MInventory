@@ -56,8 +56,8 @@ public class MInventoryController {
      * @return List with storage- and item-objects
      */
     public SimpleListProperty<MInventoryObject> testRead(){
-        //return readObjectsFromFile();
-        return fakeRead();
+        return readObjectsFromFile();
+        //return fakeRead();
     }
 
     /**
@@ -139,7 +139,7 @@ public class MInventoryController {
 
     private MInventoryObject createMInventoryObject(String[] arguments) {
 
-        int id = Integer.parseInt(arguments[IDENTIFIER]);
+        int id = Integer.parseInt(arguments[OBJECT_ID]);
 
         if ( Integer.parseInt(arguments[CONTAINER_ID]) != -1) {
             itemToStorage.put(id, Integer.parseInt(arguments[OBJECT_ID]));

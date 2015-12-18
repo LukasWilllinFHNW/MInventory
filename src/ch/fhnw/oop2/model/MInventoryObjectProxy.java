@@ -7,6 +7,8 @@ public class MInventoryObjectProxy extends MInventoryObject {
 
     private int id;
 
+    private char identifier;
+
     // TODO: Add symbol instead of id or both
 
 
@@ -17,8 +19,9 @@ public class MInventoryObjectProxy extends MInventoryObject {
      * @param description description of proxyObject
      * @param symbolId id of symbol of proxyObject
      */
-    public MInventoryObjectProxy(int id, String name, String description, int symbolId) {
+    public MInventoryObjectProxy(char identifier,int id, String name, String description, int symbolId) {
         super(-1, name, description, symbolId);
+        this.identifier = identifier;
     }
 
 
@@ -34,9 +37,11 @@ public class MInventoryObjectProxy extends MInventoryObject {
     // --- GETTER ---
     @Override
     public int getId() { return this.id; }
+    public char getIdentifier() { return this.identifier; }
 
     // --- SETTER ---
     public void setId(int id) {
         this.id = id;
     }
+    public void setIdentifier(char identifier) { this.identifier = identifier; }
 }

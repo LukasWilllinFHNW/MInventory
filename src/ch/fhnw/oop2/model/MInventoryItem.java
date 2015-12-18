@@ -20,4 +20,13 @@ public class MInventoryItem extends MInventoryObject {
 
         super(id, name, description, symbolId); //description, symbolId, false);
     }
+
+    public MInventoryItem(int id, MInventoryObject object) {
+        super(id, object);
+    }
+
+    public static MInventoryObject emptyObject() {
+
+        return new MInventoryItem(-1, "", "", -1);
+    }
 }

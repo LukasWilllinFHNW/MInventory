@@ -6,3 +6,8 @@
 #PreviewView {
     -fx-background-color: rgba(20, 20, 20, 1);
 }
+
+#roundedShape {
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+}

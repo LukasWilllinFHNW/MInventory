@@ -3,6 +3,7 @@ package ch.fhnw.oop2.model;
 //import java.lang.Exception.*;
 import javafx.beans.property.*;
 import javafx.css.SimpleStyleableIntegerProperty;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.lang.*;
 import java.security.InvalidParameterException;
@@ -43,6 +44,15 @@ public abstract class MInventoryObject {
         this.symbolId = new SimpleIntegerProperty(symbolId);
     }
 
+    public MInventoryObject(int id, MInventoryObject object) {
+        this.id = id;
+        this.name = new SimpleStringProperty(object.getName());
+        this.description = new SimpleStringProperty(object.getDescription());
+        this.symbolId = new SimpleIntegerProperty(object.getSymbolId());
+    }
+
+
+    // --- API ---
     protected String infoAsLine(){
         StringBuffer info = new StringBuffer();
 
@@ -53,6 +63,7 @@ public abstract class MInventoryObject {
 
         return info.toString();
     }
+
 
     // --- GETTER ---
     public String getName(){

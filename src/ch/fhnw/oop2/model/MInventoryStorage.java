@@ -31,6 +31,15 @@ public class MInventoryStorage extends MInventoryObject {
         this.objectIds = FXCollections.observableArrayList();
     }
 
+    public MInventoryStorage(int id, MInventoryObject object) {
+        super(id, object);
+        this.objectIds = FXCollections.observableArrayList();
+    }
+
+    public static MInventoryObject emptyObject() {
+        return new MInventoryStorage(-1, "", "", -1);
+    }
+
 
     // --- API ---
     /**
@@ -47,6 +56,7 @@ public class MInventoryStorage extends MInventoryObject {
     public List<Integer> getContainedObjectIds() {
         return objectIds.stream().collect(Collectors.toList());
     }
+
 
     // --- HELPER ---
     /* Check if another object fits into this storage *

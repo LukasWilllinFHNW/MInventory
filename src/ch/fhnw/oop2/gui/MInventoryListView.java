@@ -2,67 +2,74 @@ package ch.fhnw.oop2.gui;
 
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryObject;
+import ch.fhnw.oop2.model.MInventoryPresentationModel;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 /**
  * Created by Lukas on 01.12.2015.
  */
-public class MInventoryListView extends ListView {
+public class MInventoryListView extends VBox implements ViewTemplate{
 
-    private CustomListCell customListCell;
+    private MInventoryPresentationModel presModel;
+    private MInventoryDataModel dataModel;
 
-    public MInventoryListView(MInventoryDataModel dataModel){
+    private ColumnConstraints cc;
 
-        customListCell = new CustomListCell();
+    ListView list = new ListView();
 
-        super.setCellFactory(lv -> {
-            // create nodes, register listeners on them, populate cellRoot, etc...
-            CustomListCell cell = new CustomListCell();
-            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                if (newItem != null) {
-                    cell.updateItem(newItem, false);
-                }
-            });
-            cell.setOnMouseClicked( (MouseEvent event) -> {
-                if (cell.getItem() != null) dataModel.updateSelection(cell.getItem().getId());
-            });
-            cell.setContentDisplay(ContentDisplay.LEFT);
+    public MInventoryListView(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
 
-            return cell ;
-        });
+        this.presModel = presModel;
+        this.dataModel = dataModel;
 
-        // -- Perform Startup Methods --
-        initializeControls();
-        //initializeLayout();
-        //layoutPanes();
-        //layoutControls();
-        addActionEvents();
-        addListeners();
-        //applyStylesheet();
-        //applySpecialStyles();
+        cc = new ColumnConstraints();
+            cc.setPercentWidth(30);
+            cc.setHgrow(Priority.ALWAYS);
+
+        initSequence();
     }
 
+    @Override
     public void initializeControls() {
 
+        list.setCellFactory(lv -> { CustomListCell cell = new CustomListCell(presModel, dataModel);
+            return cell ; });
     }
 
+    @Override
     public void layoutControls() {
+        this.getChildren().add(list);
+    }
+
+
+    @Override
+    public void addBindings(){
+        list.itemsProperty().bind(dataModel.getMInventoryObjectSimpleListProperty());
+        this.disableProperty().bind(presModel.getAddDisabledProperty());
+    }
+
+    @Override
+    public void initializeLayout() {
 
     }
 
-    public void addActionEvents() {
-        //onMouseClickedProperty( node -> MInventoryUI.getMInventoryDetailedView().updateControls() );
-    }
-
-    public void addListeners() {
+    @Override
+    public void layoutPanes() {
 
     }
 
+    @Override
+    public void addEvents() {
+
+    }
 
 }

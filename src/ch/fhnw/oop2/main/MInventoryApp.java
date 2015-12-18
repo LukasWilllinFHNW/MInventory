@@ -5,8 +5,11 @@ import ch.fhnw.oop2.control.MInventoryController;
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
 import javafx.application.Application;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.effect.BoxBlur;
 import javafx.stage.Stage;
 
 import ch.fhnw.oop2.gui.MInventoryUI;
@@ -24,15 +27,28 @@ public class MInventoryApp extends Application{
     private MInventoryController mInventoryController;
     private MInventoryCmd mInventoryCmd;
 
+    private int startHeight = 600;
+    private int startWidth = 800;
+
     @Override
     public void start(Stage primaryStage) throws Exception{
 
-        mInventoryController = new MInventoryController();
-        dataModel = new MInventoryDataModel(mInventoryController.testRead());
-        mInventoryController.addDataModel(dataModel);
+        dataModel = new MInventoryDataModel();
         presModel = new MInventoryPresentationModel();
+        mInventoryController = new MInventoryController(dataModel);
+        dataModel.setMInventoryObjectListProperty(mInventoryController.readObjectsFromFile());
 
+        // -- setup the main UI --
         Parent rootPanel = new MInventoryUI(presModel, dataModel);
+
+        IntegerProperty blur = new SimpleIntegerProperty();
+            blur.bind(presModel.getBlurProperty());
+        BoxBlur bb = new BoxBlur();
+            bb.widthProperty().bind(blur);
+            bb.heightProperty().bind(blur);
+            bb.setIterations(3);
+
+        rootPanel.setEffect(bb);
 
         // -- prepare scene & add stylesheet --
         Scene scene = new Scene(rootPanel);
@@ -42,8 +58,24 @@ public class MInventoryApp extends Application{
         // -- prepare the main window --
         primaryStage.setTitle(presModel.getWindowTitleTextProperty().get());
         primaryStage.setScene(scene);
-        primaryStage.setHeight(600);
-        primaryStage.setWidth(800);
+        primaryStage.setHeight(startHeight);
+        primaryStage.setWidth(startWidth);
+
+        primaryStage.xProperty().addListener((observable, oldValue, newValue) -> {
+            presModel.setX(newValue.doubleValue());
+        });
+        primaryStage.yProperty().addListener((observable, oldValue, newValue) -> {
+            presModel.setY(newValue.doubleValue());
+        });
+        presModel.getHeightProperty().setValue(startHeight);
+        primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
+            presModel.getHeightProperty().setValue(newValue);
+        });
+        presModel.getWidthProperty().setValue(startWidth);
+        primaryStage.widthProperty().addListener((observable, oldValue, newValue) -> {
+            presModel.getWidthProperty().setValue(newValue);
+        });
+
         primaryStage.centerOnScreen();
 
         primaryStage.show();

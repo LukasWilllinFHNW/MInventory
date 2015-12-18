@@ -1,10 +1,9 @@
 package ch.fhnw.oop2.model;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,36 +16,92 @@ public class MInventoryDataModel {
 
     private final IntegerProperty currentSelectedId = new SimpleIntegerProperty(-1);
 
-    private final MInventoryObjectProxy proxy = new MInventoryObjectProxy(-1, null, null, -1);
+    private final MInventoryObjectProxy proxy = new MInventoryObjectProxy('o', -1, null, null, -1);
+    private MInventoryObject temporaryObject;
 
     public final String ITEM_IDENTIFER = "i";
     public final String STORAGE_IDENTIFIER = "s";
 
     private SimpleListProperty<MInventoryObject> mInventoryObjectList;
 
-    // --- CONSTRUCTORS ---
-    public MInventoryDataModel(SimpleListProperty mInventoryObjectSimpleListProperty) {
-        this.mInventoryObjectList = mInventoryObjectSimpleListProperty;
-    }
-
 
     // --- API ---
+    public void addNewObject(char identifier) {
+
+        temporaryObject = null;
+
+        StringProperty name = new SimpleStringProperty();
+        StringProperty description = new SimpleStringProperty();
+        this.unselect(currentSelectedId.get());
+        if (identifier == 'i')
+            temporaryObject = MInventoryItem.emptyObject();
+        if (identifier == 's')
+            temporaryObject = MInventoryStorage.emptyObject();
+        if (temporaryObject == null)
+            throw new InvalidParameterException("Wrong identifier");
+        proxy.setIdentifier(identifier);
+        this.select(0);
+    }
+
+    public void save() {
+        int newID = mInventoryObjectList.stream()
+                .map(MInventoryObject::getId)
+                .max((i1, i2) -> i1.compareTo(i2))
+                .get()+1;
+        if (newID > (Integer.MAX_VALUE -1)) {
+            // TODO: Optimize ids (fill up gaps) if max value is reached
+        };
+        if (proxy.getIdentifier() == 'i' && temporaryObject != null) {
+            mInventoryObjectList.add(new MInventoryItem(newID, temporaryObject));
+        }
+        if (proxy.getIdentifier() == 's' && temporaryObject != null) {
+            mInventoryObjectList.add(new MInventoryStorage(newID, temporaryObject));
+        }
+        unselect(currentSelectedId.get());
+        select(newID);
+    }
+
+    public void cancel() {
+        unselect(0);
+        select(currentSelectedId.get());
+    }
+
+    // -- selection handling --
     public void updateSelection(int newSelectedId){
-        MInventoryObject newObject = this.getById(newSelectedId);
-        MInventoryObject oldObject = this.getById(currentSelectedId.intValue());
+        int newID = newSelectedId;
+        int oldID = currentSelectedId.get();
         // DO unbinding
+        this.unselect(oldID);
+        this.select(newID);
+    }
+
+    public void unselect(int oldID) {
+        MInventoryObject oldObject = getById(oldID);
         if (oldObject != null) {
             proxy.getNameProperty().unbindBidirectional(oldObject.getNameProperty());
             proxy.getDescriptionProperty().unbindBidirectional(oldObject.getDescriptionProperty());
             proxy.setId(-1);
-            this.currentSelectedId.setValue(-1);
+            //if(oldID < 1) this.currentSelectedId.setValue(-1);
+            proxy.setId('o');
         }
+        if (oldID < 1) {
+            temporaryObject = null;
+        }
+    }
+    public void select(int newID) {
+        MInventoryObject newObject = getById(newID);
         if (newObject != null) {
             proxy.getNameProperty().bindBidirectional(newObject.getNameProperty());
             proxy.getDescriptionProperty().bindBidirectional(newObject.getDescriptionProperty());
             proxy.setId(newObject.getId());
-            this.currentSelectedId.setValue(newSelectedId);
+            if(newID > 0 )this.currentSelectedId.setValue(newObject.getId());
+            proxy.setId('o');
         }
+    }
+
+    public void unset() {
+        unselect(0);
+        select(currentSelectedId.get());
     }
 
     public String infoAsLine(int objectId){
@@ -89,6 +144,9 @@ public class MInventoryDataModel {
     }
 
     public MInventoryObject getById(int id) {
+        if (id == 0) {
+            return temporaryObject;
+        }
         Optional<MInventoryObject> object = mInventoryObjectList.stream()
                 .filter(mInventoryObject -> mInventoryObject.getId() == id)
                 .findAny();
@@ -99,13 +157,19 @@ public class MInventoryDataModel {
         return this.proxy;
     }
 
-    // --- GETTER PROPERTY ---
+
+    // --- PROPERTY GETTER ---
     public SimpleListProperty<MInventoryObject> getMInventoryObjectSimpleListProperty() {
         return this.mInventoryObjectList;
     }
 
+
     // --- SETTER ---
-    public void setMInventoryObjectSimpleListProperty(ObservableList<MInventoryObject> mInventoryObjectSimpleListProperty) {
-        this.mInventoryObjectList.set(mInventoryObjectSimpleListProperty);
+    public void setMInventoryObjectListProperty(SimpleListProperty<MInventoryObject> mInventoryObjectSimpleListProperty) {
+        this.mInventoryObjectList = mInventoryObjectSimpleListProperty;
+    }
+
+    public void setDataMode(SimpleListProperty<MInventoryObject> mInventoryObjectList) {
+        this.mInventoryObjectList = mInventoryObjectList;
     }
 }

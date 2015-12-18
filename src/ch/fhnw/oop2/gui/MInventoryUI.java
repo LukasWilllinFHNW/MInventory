@@ -2,6 +2,8 @@ package ch.fhnw.oop2.gui;
 
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryObject;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
@@ -67,12 +69,13 @@ public class MInventoryUI extends GridPane {
         this.getRowConstraints().addAll(rcUITopBar, rcUI);
         this.setPadding(new Insets(0, 12, 16, 12));
 
+
+
         // -- Perform Startup Methods --
         initializeControls();
         initializeLayout();
         layoutPanes();
         layoutControls();
-        fillInData();
         addListeners();
         prepareStyles();
         applySpecialStyles();
@@ -98,9 +101,9 @@ public class MInventoryUI extends GridPane {
         generalGridPane.getColumnConstraints().addAll(gccListView, gccMainWindow);
         generalGridPane.getRowConstraints().add(grcWholePane);
 
-        mInventoryTopBarView = new MInventoryTopBarView(dataModel);
-        mInventoryListView = new MInventoryListView(dataModel);
-        mInventoryDetailedView = new MInventoryDetailedView(dataModel);
+        mInventoryTopBarView = new MInventoryTopBarView(presModel, dataModel);
+        mInventoryListView = new MInventoryListView(presModel, dataModel);
+        mInventoryDetailedView = new MInventoryDetailedView(presModel, dataModel);
     }
 
     private void layoutPanes() {
@@ -110,10 +113,6 @@ public class MInventoryUI extends GridPane {
         this.generalGridPane.add(mInventoryDetailedView, 1, 0);
 
         this.add(generalGridPane,0,1);
-    }
-
-    private void fillInData() {
-        mInventoryListView.itemsProperty().setValue(dataModel.getMInventoryObjectSimpleListProperty());
     }
 
     private void layoutControls(){
@@ -141,4 +140,9 @@ public class MInventoryUI extends GridPane {
     }
 
     // hide views
+
+
+
+
+
 }

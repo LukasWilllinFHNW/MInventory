@@ -62,4 +62,15 @@ public class MInventoryPresentationModel {
     public void doBlur() { this.blurProperty.setValue(80);}
     public void undoBlur() { this.blurProperty.setValue(0);}
 
+    public void enterAddingMode() {
+        getSaveDisabledProperty().setValue(false);
+        getAddDisabledProperty().setValue(true);
+    }
+
+    public void enterEditMode() {
+        getSaveDisabledProperty().setValue(true);
+        getAddDisabledProperty().setValue(false);
+        undoBlur();
+    }
+
 }

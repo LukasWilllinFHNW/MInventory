@@ -2,6 +2,7 @@ package ch.fhnw.oop2.gui;
 
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
+import com.sun.javafx.css.Style;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -18,11 +19,8 @@ public class Overlay extends Stage implements ViewTemplate {
     private MInventoryPresentationModel presModel;
     private MInventoryDataModel dataModel;
 
-    private ColumnConstraints cc;
-    private RowConstraints rc;
-
-    private GridPane grid;
-    private VBox vbox;
+    private VBox container;
+    private VBox virtualContainer;
     private Scene scene;
 
 
@@ -35,6 +33,12 @@ public class Overlay extends Stage implements ViewTemplate {
         initSequence();
 
         this.initStyle(StageStyle.TRANSPARENT);
+        this.setMinWidth(presModel.getWidthProperty().get());
+        this.setMinHeight(presModel.getHeightProperty().get());
+        this.setMaxWidth(presModel.getWidthProperty().get());
+        this.setMaxHeight(presModel.getHeightProperty().get());
+
+
         this.toFront();
         this.show();
     }
@@ -44,78 +48,96 @@ public class Overlay extends Stage implements ViewTemplate {
     public void addNode(Node node) {
 
         node.opacityProperty().setValue(1f);
-        this.vbox.getChildren().add(node);
+        node.autosize();
+        this.container.getChildren().add(node);
+        updateLayout();
+    }
 
+    private void updateLayout() {
+        updateSize(); // size needs to be evaluated first
+
+        double x = presModel.getX();
+        double y = presModel.getY();
+
+        x += (presModel.getWidthProperty().getValue()/2);
+        x -= (this.getWidth()/2);
+        y += (presModel.getHeightProperty().getValue()/2);
+        y -= (this.getHeight()/2);
+
+        this.setX(x);
+        this.setY(y);
+    }
+
+    private void updateSize() {
+        // TODO: Implement proper resising
+        double h = presModel.getHeightProperty().get()-200;
+        double w = presModel.getWidthProperty().get()-300;
+
+        for (Node n : container.getChildren()) {
+            h += n.getBoundsInParent().getHeight();
+            if (w < n.getBoundsInParent().getWidth()) {
+                //w = n.getBoundsInParent().getWidth();
+            }
+        }
+        this.setHeight(h);
+        this.setWidth(w);
     }
 
 
     // --- UI INIT ---
-    @Override
     public void initializeControls() {
 
     }
 
-    @Override
     public void initializeLayout() {
+
+
+        virtualContainer = new VBox();
+            virtualContainer.setMinSize(Double.MAX_VALUE-1, Double.MAX_VALUE-1);
+            virtualContainer.setPrefSize(Double.MAX_VALUE-1, Double.MAX_VALUE-1);
 
         presModel.doBlur();
 
-        cc = new ColumnConstraints();
-            cc.prefWidthProperty().bind(presModel.getWidthProperty());
-        rc = new RowConstraints();
-            rc.prefHeightProperty().bind(presModel.getWidthProperty());
+        container = new VBox();
+            container.setAlignment(Pos.CENTER);
 
-        this.setX(presModel.getX());
-        this.setY(presModel.getY());
-
-        this.setHeight(presModel.getHeightProperty().getValue());
-        this.setWidth(presModel.getWidthProperty().getValue());
-
-        vbox = new VBox();
-            vbox.setAlignment(Pos.CENTER);
-
-        grid = new GridPane();
-            grid.getColumnConstraints().add(cc);
-            grid.getRowConstraints().add(rc);
-            grid.setAlignment(Pos.CENTER);
-
-        scene = new Scene(grid);
-
+        scene = new Scene(container);
     }
 
-    @Override
     public void layoutPanes() {
-
-        grid.add(vbox, 0, 0);
         this.setScene(scene);
     }
 
-    @Override
     public void layoutControls() {
 
     }
 
     @Override
-    public void addEvents() {
+    public void addListeners() {
         this.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
+                presModel.enterEditMode();
                 this.close();
-                presModel.undoBlur();
-                presModel.getAddDisabledProperty().setValue(false);
-                presModel.getSaveDisabledProperty().setValue(true);
-            }
-        });
+            } });
+    }
+
+    @Override
+    public void addEvents() {
+        this.container.setOnMouseClicked(event -> {
+            presModel.enterEditMode();
+            this.close(); });
     }
 
     @Override
     public void applyStylesheet() {
         Rectangle rect = new Rectangle();
             rect.setId("roundedShape");
-        vbox.setShape(rect);
+        container.setShape(rect);
+        container.setId("overlay_Container");
+        container.setStyle("overlay_Container");
 
         this.opacityProperty().setValue(1f);
-        grid.opacityProperty().setValue(1f);
-        vbox.opacityProperty().setValue(1f);
+        container.opacityProperty().setValue(1f);
     }
 
 

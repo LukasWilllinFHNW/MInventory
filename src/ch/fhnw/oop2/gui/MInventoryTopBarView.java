@@ -22,7 +22,8 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
     private Button askIfItem;
     private Button askIfStorage;
 
-    Overlay overlay;
+    private Overlay overlay;
+    private MInventoryDetailedView addView;
 
     public MInventoryTopBarView(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
 
@@ -35,7 +36,6 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
     @Override
     public void initializeLayout() {
 
-        overlay = new Overlay(presModel, dataModel);
     }
 
     @Override
@@ -64,14 +64,14 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
     @Override
     public void layoutControls() {
 
-        this.getChildren().addAll(addButton, saveButton, cancelButton);
+        this.getChildren().addAll(addButton); //, saveButton, cancelButton);
     }
 
     @Override
     public void addEvents() {
 
         this.addButton.setOnMouseClicked(event -> {
-
+            presModel.doBlur();
             overlay = new Overlay(presModel, dataModel);
             overlay.addNode(askIfItem);
             overlay.addNode(askIfStorage);
@@ -79,35 +79,39 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
 
         this.askIfItem.setOnMouseClicked(event -> {
             overlay.close();
-            enterAddingMode();
-            dataModel.addNewObject('i'); });
+            presModel.enterAddingMode();
+            dataModel.addNewObject('i');
+            overlay = new Overlay(presModel, dataModel);
+            overlay.addNode(saveButton);
+            overlay.addNode(cancelButton);
+            overlay.addNode(addView = new MInventoryDetailedView(presModel, dataModel));
+        });
         this.askIfStorage.setOnMouseClicked(event -> {
             overlay.close();
-            enterAddingMode();
+            presModel.enterAddingMode();
             dataModel.addNewObject('s');
+
+            HBox box = new HBox();
+            box.getChildren().addAll(saveButton, cancelButton);
+
+            overlay = new Overlay(presModel, dataModel);
+            overlay.addNode(box);
+            overlay.addNode(addView = new MInventoryDetailedView(presModel, dataModel));
         });
 
         this.saveButton.setOnMouseClicked(event -> {
-            enterEditMode();
+            presModel.enterEditMode();
+            overlay.close();
             dataModel.save();
         });
         this.cancelButton.setOnMouseClicked(event -> {
-            enterEditMode();
+            presModel.enterEditMode();
+            overlay.close();
             dataModel.cancel();
         });
     }
 
     public void addListeners() {
 
-    }
-
-    private void enterAddingMode() {
-        presModel.getSaveDisabledProperty().setValue(false);
-        presModel.getAddDisabledProperty().setValue(true);
-    }
-
-    private void enterEditMode() {
-        presModel.getSaveDisabledProperty().setValue(true);
-        presModel.getAddDisabledProperty().setValue(false);
     }
 }

@@ -21,7 +21,7 @@ import javafx.stage.Stage;
 /**
  * Created by Lukas W on 20.10.2015.
  */
-public class MInventoryUI extends GridPane {
+public class MInventoryUI extends StackPane implements ViewTemplate{
 
     // List of all sub views
     private MInventoryTopBarView mInventoryTopBarView;
@@ -40,6 +40,8 @@ public class MInventoryUI extends GridPane {
     private RowConstraints rcUITopBar;
     private HBox hBoxTopBar;
 
+    BorderPane mainPane;
+
     /**The Super Layout Pane Of The UI */
     private GridPane generalGridPane;
         // -- Used Instances Along The Super Pane generalGridPane --
@@ -52,82 +54,57 @@ public class MInventoryUI extends GridPane {
     public MInventoryUI(MInventoryPresentationModel presModel,
                         MInventoryDataModel dataModel){
 
+        mainPane = new BorderPane();
+
         this.presModel = presModel;
         this.dataModel = dataModel;
 
-        // -- Initialize The MInventoryUI Window --
-        ccUI = new ColumnConstraints();
-            ccUI.setHgrow(Priority.ALWAYS);
-        this.getColumnConstraints().add(ccUI);
-        rcUITopBar = new RowConstraints();
-            int barHeight = 40;
-            rcUITopBar.setMinHeight(barHeight);
-            rcUITopBar.setMaxHeight(barHeight);
-        rcUI = new RowConstraints();
-            rcUI.setVgrow(Priority.ALWAYS);
-            rcUI.setPercentHeight(100);
-        this.getRowConstraints().addAll(rcUITopBar, rcUI);
-        this.setPadding(new Insets(0, 12, 16, 12));
-
-
-
         // -- Perform Startup Methods --
-        initializeControls();
-        initializeLayout();
-        layoutPanes();
-        layoutControls();
-        addListeners();
-        prepareStyles();
-        applySpecialStyles();
+        initSequence();
     }
 
-    private void initializeControls() {
+    public void initializeControls() {
     }
 
-    private void initializeLayout() {
+    public void initializeLayout() {
 
         detailedViewStage = new Stage();
-
-        // -- Main Window Grid --
-        generalGridPane = new GridPane();
-        gccListView = new ColumnConstraints();
-            gccListView.setPercentWidth(30);
-            gccListView.setHgrow(Priority.ALWAYS);
-        gccMainWindow = new ColumnConstraints();
-            gccMainWindow.setPercentWidth(70);
-            gccMainWindow.setHgrow(Priority.ALWAYS);
-        grcWholePane = new RowConstraints();
-            grcWholePane.setVgrow(Priority.ALWAYS);
-        generalGridPane.getColumnConstraints().addAll(gccListView, gccMainWindow);
-        generalGridPane.getRowConstraints().add(grcWholePane);
 
         mInventoryTopBarView = new MInventoryTopBarView(presModel, dataModel);
         mInventoryListView = new MInventoryListView(presModel, dataModel);
         mInventoryDetailedView = new MInventoryDetailedView(presModel, dataModel);
     }
 
-    private void layoutPanes() {
+    public void layoutPanes() {
 
-        this.add(mInventoryTopBarView, 0, 0);
-        this.generalGridPane.add(mInventoryListView, 0, 0);
-        this.generalGridPane.add(mInventoryDetailedView, 1, 0);
+        mainPane.setTop(mInventoryTopBarView);
 
-        this.add(generalGridPane,0,1);
+        mainPane.setCenter(mInventoryDetailedView);
+        mainPane.setLeft(mInventoryListView);
+
+        this.getChildren().add(mainPane);
     }
 
-    private void layoutControls(){
+    public void layoutControls(){
 
     }
 
-    private void addListeners(){
+    public void addListeners(){
+
     }
 
-    private void prepareStyles() {
+    @Override
+    public void addEvents() {
+
+    }
+
+    @Override
+    public void applyStylesheet() {
+
+    }
+
+    public void applySpecialStyles() {
         this.setId("MInventoryUI");
-    }
-
-    private void applySpecialStyles() {
-
     }
 
     // get views

@@ -44,14 +44,15 @@ public class MInventoryPresentationModel {
         return this.windowTitle;
     }
 
-    public BooleanProperty getSaveDisabledProperty() { return saveDisabledProperty; }
-    public BooleanProperty getAddDisabledProperty() { return addDisabledProperty; }
-
     public double getX() { return x.getValue().doubleValue(); }
     public double getY() { return y.getValue().doubleValue(); }
 
+    // --- GETTER PROPERTY ---
     public IntegerProperty getHeightProperty() { return heightProperty; }
     public IntegerProperty getWidthProperty() { return widthProperty; }
+
+    public BooleanProperty getSaveDisabledProperty() { return saveDisabledProperty; }
+    public BooleanProperty getAddDisabledProperty() { return addDisabledProperty; }
 
     public IntegerProperty getBlurProperty() { return blurProperty; }
 

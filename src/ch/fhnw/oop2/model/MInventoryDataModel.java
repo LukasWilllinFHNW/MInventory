@@ -1,10 +1,12 @@
 package ch.fhnw.oop2.model;
 
+import ch.fhnw.oop2.control.MInventoryController;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,6 +15,8 @@ import java.util.stream.Stream;
  * Created by Lukas on 02.12.2015.
  */
 public class MInventoryDataModel {
+
+    private MInventoryController controller;
 
     private final IntegerProperty currentSelectedId = new SimpleIntegerProperty(-1);
 
@@ -43,11 +47,16 @@ public class MInventoryDataModel {
         this.select(0);
     }
 
-    public void save() {
-        int newID = mInventoryObjectList.stream()
-                .map(MInventoryObject::getId)
-                .max((i1, i2) -> i1.compareTo(i2))
-                .get()+1;
+    public void create() {
+        int newID;
+        try {
+            newID = mInventoryObjectList.stream()
+                    .map(MInventoryObject::getId)
+                    .max((i1, i2) -> i1.compareTo(i2))
+                    .get() + 1;
+        } catch (NoSuchElementException e) {
+            newID = 1;
+        }
         if (newID > (Integer.MAX_VALUE -1)) {
             // TODO: Optimize ids (fill up gaps) if max value is reached
         };
@@ -64,6 +73,10 @@ public class MInventoryDataModel {
     public void cancel() {
         unselect(0);
         select(currentSelectedId.get());
+    }
+
+    public void delete() {
+        this.getMInventoryObjectSimpleListProperty().remove(getById(currentSelectedId.get()));
     }
 
     // -- selection handling --
@@ -99,9 +112,8 @@ public class MInventoryDataModel {
         }
     }
 
-    public void unset() {
-        unselect(0);
-        select(currentSelectedId.get());
+    public void save() {
+        this.controller.writeObjectsToFile();
     }
 
     public String infoAsLine(int objectId){
@@ -166,10 +178,14 @@ public class MInventoryDataModel {
 
     // --- SETTER ---
     public void setMInventoryObjectListProperty(SimpleListProperty<MInventoryObject> mInventoryObjectSimpleListProperty) {
-        this.mInventoryObjectList = mInventoryObjectSimpleListProperty;
+        if (mInventoryObjectList == null) this.mInventoryObjectList = mInventoryObjectSimpleListProperty;
     }
 
     public void setDataMode(SimpleListProperty<MInventoryObject> mInventoryObjectList) {
         this.mInventoryObjectList = mInventoryObjectList;
+    }
+
+    public void setMInventoryController(MInventoryController mInventoryController) {
+        if (controller == null) controller = mInventoryController;
     }
 }

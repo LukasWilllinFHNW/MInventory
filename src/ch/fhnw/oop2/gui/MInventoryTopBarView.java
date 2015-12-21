@@ -5,7 +5,6 @@ import ch.fhnw.oop2.model.MInventoryPresentationModel;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 
 /**
  * Created by Lukas on 01.12.2015.
@@ -16,7 +15,10 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
     private final MInventoryDataModel dataModel;
 
     private Button addButton;
+    private Button deleteButton;
     private Button saveButton;
+
+    private Button createButton;
     private Button cancelButton;
 
     private Button askIfItem;
@@ -47,9 +49,14 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
     public void initializeControls() {
 
         this.addButton = new Button("+");
-             addButton.disableProperty().bind(presModel.getAddDisabledProperty());
+            addButton.disableProperty().bind(presModel.getAddDisabledProperty());
+        this.deleteButton = new Button("-");
+            deleteButton.disableProperty().bind(presModel.getAddDisabledProperty());
         this.saveButton = new Button("save");
-             saveButton.disableProperty().bind(presModel.getSaveDisabledProperty());
+            saveButton.disableProperty().bind(presModel.getAddDisabledProperty());
+
+        this.createButton = new Button("create");
+            createButton.disableProperty().bind(presModel.getSaveDisabledProperty());
         this.cancelButton = new Button("cancel");
             cancelButton.disableProperty().bind(presModel.getSaveDisabledProperty());
 
@@ -64,7 +71,7 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
     @Override
     public void layoutControls() {
 
-        this.getChildren().addAll(addButton); //, saveButton, cancelButton);
+        this.getChildren().addAll(addButton, deleteButton, saveButton);
     }
 
     @Override
@@ -72,19 +79,25 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
 
         this.addButton.setOnMouseClicked(event -> {
             presModel.doBlur();
-            overlay = new Overlay(presModel, dataModel);
+            overlay = new Overlay(presModel, dataModel, presModel.getHeightProperty().get()-400, presModel.getWidthProperty().get()-400);
             overlay.addNode(askIfItem);
             overlay.addNode(askIfStorage);
         });
+
+        this.deleteButton.setOnMouseClicked(event -> {
+            dataModel.delete(); });
+
+        this.saveButton.setOnMouseClicked(event1 -> {
+            dataModel.create(); });
 
         this.askIfItem.setOnMouseClicked(event -> {
             overlay.close();
             presModel.enterAddingMode();
             dataModel.addNewObject('i');
-            overlay = new Overlay(presModel, dataModel);
-            overlay.addNode(saveButton);
+            overlay = new Overlay(presModel, dataModel, presModel.getHeightProperty().get()-200, presModel.getWidthProperty().get()-200);
+            overlay.addNode(createButton);
             overlay.addNode(cancelButton);
-            overlay.addNode(addView = new MInventoryDetailedView(presModel, dataModel));
+            overlay.addNode(new MInventoryDetailedView(presModel, dataModel));
         });
         this.askIfStorage.setOnMouseClicked(event -> {
             overlay.close();
@@ -92,17 +105,17 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
             dataModel.addNewObject('s');
 
             HBox box = new HBox();
-            box.getChildren().addAll(saveButton, cancelButton);
+            box.getChildren().addAll(createButton, cancelButton);
 
-            overlay = new Overlay(presModel, dataModel);
+            overlay = new Overlay(presModel, dataModel, presModel.getHeightProperty().get()-200, presModel.getWidthProperty().get()-200);
             overlay.addNode(box);
-            overlay.addNode(addView = new MInventoryDetailedView(presModel, dataModel));
+            overlay.addNode(new MInventoryDetailedView(presModel, dataModel));
         });
 
-        this.saveButton.setOnMouseClicked(event -> {
+        this.createButton.setOnMouseClicked(event -> {
             presModel.enterEditMode();
             overlay.close();
-            dataModel.save();
+            dataModel.create();
         });
         this.cancelButton.setOnMouseClicked(event -> {
             presModel.enterEditMode();

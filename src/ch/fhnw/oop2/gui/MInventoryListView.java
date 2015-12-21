@@ -3,10 +3,12 @@ package ch.fhnw.oop2.gui;
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryObject;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
+import javafx.event.Event;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -22,7 +24,7 @@ public class MInventoryListView extends VBox implements ViewTemplate{
     private MInventoryPresentationModel presModel;
     private MInventoryDataModel dataModel;
 
-    private ColumnConstraints cc;
+    private KeyEvent delPressed;
 
     ListView list = new ListView();
 
@@ -31,17 +33,14 @@ public class MInventoryListView extends VBox implements ViewTemplate{
         this.presModel = presModel;
         this.dataModel = dataModel;
 
-        cc = new ColumnConstraints();
-            cc.setPercentWidth(30);
-            cc.setHgrow(Priority.ALWAYS);
-
         initSequence();
     }
 
     @Override
     public void initializeControls() {
 
-        list.setCellFactory(lv -> { CustomListCell cell = new CustomListCell(presModel, dataModel);
+        list.setCellFactory(lv -> {
+            CustomListCell cell = new CustomListCell(presModel, dataModel);
             return cell ; });
     }
 
@@ -58,8 +57,14 @@ public class MInventoryListView extends VBox implements ViewTemplate{
     }
 
     @Override
+    public void addListeners() {
+
+    }
+
+    @Override
     public void initializeLayout() {
 
+        list.autosize();
     }
 
     @Override

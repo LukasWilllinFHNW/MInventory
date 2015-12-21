@@ -1,14 +1,19 @@
 package ch.fhnw.oop2.model;
 
+import ch.fhnw.oop2.gui.MInventoryUI;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Parent;
 
 /**
  * Created by Lukas W on 03.11.2015.
  */
 public class MInventoryPresentationModel {
+
+    private Parent mainUI;
+
     private final StringProperty windowTitle = new SimpleStringProperty("MInventory App");
     private final StringProperty buttontext = new SimpleStringProperty("thisisabutton");
 
@@ -24,8 +29,6 @@ public class MInventoryPresentationModel {
     private static IntegerProperty y = new SimpleIntegerProperty(0);
 
     private ObservableList<MInventoryObject> objectList;
-    // public StringProperty getButtonTextProperty() { return this.buttontext; }
-
 
     // --- CONSTRUCTORS ---
     /**
@@ -47,6 +50,10 @@ public class MInventoryPresentationModel {
     public double getX() { return x.getValue().doubleValue(); }
     public double getY() { return y.getValue().doubleValue(); }
 
+    public MInventoryUI getMainUI() {
+        return (MInventoryUI) this.mainUI;
+    }
+
     // --- GETTER PROPERTY ---
     public IntegerProperty getHeightProperty() { return heightProperty; }
     public IntegerProperty getWidthProperty() { return widthProperty; }
@@ -57,6 +64,10 @@ public class MInventoryPresentationModel {
     public IntegerProperty getBlurProperty() { return blurProperty; }
 
     // --- SETTER ---
+    public void setMainUI(Parent mainUI) {
+        this.mainUI = mainUI;
+    }
+
     public void setX(double x) { this.x.setValue(x); }
     public void setY(double y) { this.y.setValue(y); }
 

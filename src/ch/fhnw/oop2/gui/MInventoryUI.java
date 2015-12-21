@@ -5,8 +5,11 @@ import ch.fhnw.oop2.model.MInventoryObject;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
+import javafx.scene.effect.BoxBlur;
 import javafx.scene.layout.*;
 
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
@@ -27,29 +30,12 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
     private MInventoryTopBarView mInventoryTopBarView;
     private static MInventoryListView mInventoryListView;
     private static MInventoryDetailedView mInventoryDetailedView;
-    private static Stage detailedViewStage;
 
     /** The PresentationModel for main UI */
     private MInventoryPresentationModel presModel;
     private MInventoryDataModel dataModel;
 
-    /** Column Constraint For The InventoryUI */
-    private ColumnConstraints ccUI;
-    /** Row Constraint For The InventoryUI */
-    private RowConstraints rcUI;
-    private RowConstraints rcUITopBar;
-    private HBox hBoxTopBar;
-
     BorderPane mainPane;
-
-    /**The Super Layout Pane Of The UI */
-    private GridPane generalGridPane;
-        // -- Used Instances Along The Super Pane generalGridPane --
-        private ColumnConstraints gccListView;
-        private ColumnConstraints gccMainWindow;
-        private RowConstraints grcWholePane;
-        private ListView<MInventoryObject> listView;
-
 
     public MInventoryUI(MInventoryPresentationModel presModel,
                         MInventoryDataModel dataModel){
@@ -63,12 +49,26 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
         initSequence();
     }
 
+    // show views
+
+    // -- add and show views --
+    public void addNode(Node node) {
+        this.getChildren().add(node);
+        System.out.println();
+    }
+
+    public void removeNode(Node node) {
+        this.getChildren().remove(node);
+    }
+
+    // hide views
+
+
+    // --- INIT SEQUENCE ---
     public void initializeControls() {
     }
 
     public void initializeLayout() {
-
-        detailedViewStage = new Stage();
 
         mInventoryTopBarView = new MInventoryTopBarView(presModel, dataModel);
         mInventoryListView = new MInventoryListView(presModel, dataModel);
@@ -100,24 +100,20 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
 
     @Override
     public void applyStylesheet() {
-
-    }
-
-    public void applySpecialStyles() {
         this.setId("MInventoryUI");
     }
 
-    // get views
-    public static MInventoryDetailedView getMInventoryDetailedView() { return mInventoryDetailedView; }
-    public static MInventoryListView getMInventoryListView() { return mInventoryListView; }
+    @Override
+    public void applySpecialStyles() {
+        IntegerProperty blur = new SimpleIntegerProperty();
+        blur.bind(presModel.getBlurProperty());
+        BoxBlur bb = new BoxBlur();
+        bb.widthProperty().bind(blur);
+        bb.heightProperty().bind(blur);
+        bb.setIterations(5);
 
-    // show views
-    public static void showMInventoryDetailedView() {
-
+        mainPane.setEffect(bb);
     }
-
-    // hide views
-
 
 
 

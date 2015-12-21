@@ -2,11 +2,14 @@ package ch.fhnw.oop2.gui;
 
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
-import com.sun.javafx.css.Style;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -19,125 +22,99 @@ public class Overlay extends Stage implements ViewTemplate {
     private MInventoryPresentationModel presModel;
     private MInventoryDataModel dataModel;
 
+    private StackPane stackPane;
     private VBox container;
-    private VBox virtualContainer;
     private Scene scene;
 
 
     // --- CONSTRUCTORS ---
-    public Overlay(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
+    public Overlay(MInventoryPresentationModel presModel, MInventoryDataModel dataModel, double height, double width){
 
         this.presModel = presModel;
         this.dataModel = dataModel;
 
         initSequence();
 
+        super.setHeight(height);
+        super.setWidth(width);
+
+        super.setX(presModel.getX() + (presModel.getWidthProperty().get()/2) - (super.getWidth()/2) );
+        super.setY(presModel.getY() + (presModel.getHeightProperty().get()/2) - (super.getHeight()/2) );
+
         this.initStyle(StageStyle.TRANSPARENT);
-        this.setMinWidth(presModel.getWidthProperty().get());
-        this.setMinHeight(presModel.getHeightProperty().get());
-        this.setMaxWidth(presModel.getWidthProperty().get());
-        this.setMaxHeight(presModel.getHeightProperty().get());
 
+        this.open();
 
-        this.toFront();
-        this.show();
     }
 
 
     // --- API ---
     public void addNode(Node node) {
-
-        node.opacityProperty().setValue(1f);
-        node.autosize();
-        this.container.getChildren().add(node);
-        updateLayout();
+        container.getChildren().add(node);
     }
 
-    private void updateLayout() {
-        updateSize(); // size needs to be evaluated first
-
-        double x = presModel.getX();
-        double y = presModel.getY();
-
-        x += (presModel.getWidthProperty().getValue()/2);
-        x -= (this.getWidth()/2);
-        y += (presModel.getHeightProperty().getValue()/2);
-        y -= (this.getHeight()/2);
-
-        this.setX(x);
-        this.setY(y);
+    public void close() {
+        super.close();
     }
 
-    private void updateSize() {
-        // TODO: Implement proper resising
-        double h = presModel.getHeightProperty().get()-200;
-        double w = presModel.getWidthProperty().get()-300;
-
-        for (Node n : container.getChildren()) {
-            h += n.getBoundsInParent().getHeight();
-            if (w < n.getBoundsInParent().getWidth()) {
-                //w = n.getBoundsInParent().getWidth();
-            }
-        }
-        this.setHeight(h);
-        this.setWidth(w);
+    public void open() {
+        super.show();
     }
 
 
     // --- UI INIT ---
-    public void initializeControls() {
+    @Override
+    public void initializeControls() { }
 
-    }
-
+    @Override
     public void initializeLayout() {
 
-
-        virtualContainer = new VBox();
-            virtualContainer.setMinSize(Double.MAX_VALUE-1, Double.MAX_VALUE-1);
-            virtualContainer.setPrefSize(Double.MAX_VALUE-1, Double.MAX_VALUE-1);
-
-        presModel.doBlur();
-
         container = new VBox();
-            container.setAlignment(Pos.CENTER);
+            container.setFillWidth(true);
+            container.autosize();
 
-        scene = new Scene(container);
+        stackPane = new StackPane(container);
+            stackPane.autosize();
     }
 
+    @Override
     public void layoutPanes() {
+        scene = new Scene(stackPane, Color.TRANSPARENT);
+
         this.setScene(scene);
     }
 
+    @Override
     public void layoutControls() {
-
     }
 
     @Override
     public void addListeners() {
-        this.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue) {
-                presModel.enterEditMode();
-                this.close();
-            } });
     }
 
     @Override
     public void addEvents() {
         this.container.setOnMouseClicked(event -> {
             presModel.enterEditMode();
-            this.close(); });
+            close();
+        });
     }
 
     @Override
     public void applyStylesheet() {
-        Rectangle rect = new Rectangle();
-            rect.setId("roundedShape");
-        container.setShape(rect);
-        container.setId("overlay_Container");
-        container.setStyle("overlay_Container");
+        scene.getStylesheets()
+            .add(getClass()
+                .getResource("appStylesheet.css")
+                .toExternalForm() );
 
-        this.opacityProperty().setValue(1f);
-        container.opacityProperty().setValue(1f);
+        stackPane.setId("overlay_Background");
+        container.setId("overlay_Container");
+    }
+
+    @Override
+    public void applySpecialStyles() {
+
+        presModel.doBlur();
     }
 
 

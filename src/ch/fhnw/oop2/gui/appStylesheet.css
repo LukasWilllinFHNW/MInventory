@@ -6,12 +6,19 @@
     -fx-background-color: rgba(20, 20, 20, 1);
 }
 
-#roundedShape {
-    -fx-background-radius: 20;
-    -fx-border-radius: 20;
+#overlay_Background {
+    -fx-effect: dropshadow(two-pass-box , darkgray, 40, 0.0 , 0, 0) ;
+	-fx-background-color: derive(lightgrey, -20%); 
+	-fx-alignment: center;
+  	-fx-background-insets: 40;
+ 	-fx-background-radius: 10;
 }
 
 #overlay_Container {
-	-fx-background-color: rgba(50, 50, 50, 0.2);
-	-fx-border-color: rgba(50, 50, 50, 1.0);
+	-fx-padding: 40;
+  	-fx-spacing: 40;
+  	-fx-alignment: center;
+  	-fx-background-color: linear-gradient(derive(lightgrey, 20%), lightgrey);
+ 	-fx-background-insets: 40;
+  	-fx-background-radius: 10;
 }

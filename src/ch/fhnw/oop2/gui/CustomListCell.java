@@ -36,21 +36,21 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
 
     @Override
     protected void updateItem(MInventoryObject mInventoryObject, boolean empty)	{
-        super.updateItem(mInventoryObject, empty);
-        setGraphic(new Circle(10, 10, 20, Color.WHITESMOKE));
-        setText(null);
-        // TODO: Remove listener working?
-        if (getItem() != null) {
-            getItem().getNameProperty().removeListener(nameChangeListener);
-            nameChangeListener = null;
-        }
-        nameChangeListener = (observable, oldValue, newValue) -> {
-            this.setText(newValue); };
 
-        if (getItem() != null) {
-            setGraphic(new Circle(10, 10, 20, Color.AQUA));
-            this.textProperty().setValue( getItem().getName());
-            getItem().getNameProperty().addListener(nameChangeListener);
+        if (super.getItem() != null && nameChangeListener != null) {
+            super.getItem().getNameProperty().removeListener(nameChangeListener);
+        }
+
+        super.updateItem(mInventoryObject, empty);
+        super.setGraphic(new Circle(10, 10, 20, Color.WHITESMOKE));
+        super.setText(null);
+
+        if (super.getItem() != null) {
+            nameChangeListener = (observable, oldValue, newValue) -> {
+                super.setText(newValue); };
+            super.setGraphic(new Circle(10, 10, 20, Color.AQUA));
+            super.textProperty().setValue( getItem().getName());
+            super.getItem().getNameProperty().addListener(nameChangeListener);
         }
     }
 
@@ -60,12 +60,10 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
     }
 
     private void addListeners() {
-        this.itemProperty().addListener((obs, oldItem, newItem) -> {
-            if (newItem != null) this.updateItem(newItem, false); });
 
-        this.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue && this.getItem() != null) {
-                dataModel.updateSelection(this.getItem().getId());
+        super.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue && super.getItem() != null) {
+                dataModel.updateSelection(super.getItem().getId());
             } });
     }
 }

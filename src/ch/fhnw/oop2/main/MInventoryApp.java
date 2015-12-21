@@ -37,18 +37,12 @@ public class MInventoryApp extends Application{
         presModel = new MInventoryPresentationModel();
         mInventoryController = new MInventoryController(dataModel);
         dataModel.setMInventoryObjectListProperty(mInventoryController.readObjectsFromFile());
+        dataModel.setMInventoryController(mInventoryController);
 
         // -- setup the main UI --
         Parent rootPanel = new MInventoryUI(presModel, dataModel);
 
-        IntegerProperty blur = new SimpleIntegerProperty();
-            blur.bind(presModel.getBlurProperty());
-        BoxBlur bb = new BoxBlur();
-            bb.widthProperty().bind(blur);
-            bb.heightProperty().bind(blur);
-            bb.setIterations(3);
-
-        rootPanel.setEffect(bb);
+        presModel.setMainUI(rootPanel);
 
         // -- prepare scene & add stylesheet --
         Scene scene = new Scene(rootPanel);
@@ -60,6 +54,8 @@ public class MInventoryApp extends Application{
         primaryStage.setScene(scene);
         primaryStage.setHeight(startHeight);
         primaryStage.setWidth(startWidth);
+        primaryStage.setMinHeight(startHeight-150);
+        primaryStage.setMinWidth(startWidth-200);
 
         primaryStage.xProperty().addListener((observable, oldValue, newValue) -> {
             presModel.setX(newValue.doubleValue());
@@ -79,10 +75,6 @@ public class MInventoryApp extends Application{
         primaryStage.centerOnScreen();
 
         primaryStage.show();
-
-        primaryStage.setOnCloseRequest(event -> {
-            mInventoryController.writeObjectsToFile();
-        });
 
         mInventoryCmd = new MInventoryCmd();
     }

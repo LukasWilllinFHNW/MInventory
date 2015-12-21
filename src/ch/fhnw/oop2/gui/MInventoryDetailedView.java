@@ -2,6 +2,7 @@ package ch.fhnw.oop2.gui;
 
 import ch.fhnw.oop2.model.*;
 import javafx.geometry.Insets;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -24,10 +25,11 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
     private MInventoryPreviewView mInventoryPreviewView;
 
     private GridPane grid;
-        private RowConstraints rc;
+        private RowConstraints rc; int rcAmount;
 
     private TextField nameField;
     private TextField descriptionField;
+    private TextArea descriptionArea;
 
     public MInventoryDetailedView(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
 
@@ -46,13 +48,13 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
         rcDetail = new RowConstraints();
             rcDetail.setPercentHeight(65);
             rcDetail.setVgrow(Priority.ALWAYS);
+        rc = new RowConstraints(); rcAmount = 5;
+            rc.setPercentHeight((100/rcAmount));
+            rc.setVgrow(Priority.ALWAYS);
 
         this.getColumnConstraints().add(ccDetail);
         this.getRowConstraints().addAll(rcPreview, rcDetail);
         this.setPadding(new Insets(0, 0, 0, 12));
-
-        rc = new RowConstraints();
-            rc.setVgrow(Priority.ALWAYS);
 
         // -- Perform Startup Methods --
         initSequence();
@@ -62,6 +64,7 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
     public void initializeControls() {
         nameField = new TextField();
         descriptionField = new TextField();
+        descriptionArea = new TextArea();
     }
 
     @Override
@@ -69,7 +72,7 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
         mInventoryPreviewView = new MInventoryPreviewView(dataModel);
         grid = new GridPane();
             for (int i = 0; i < ccAmount; ++i) grid.getColumnConstraints().add(cc);
-            grid.getRowConstraints().addAll(rc, rc, rc, rc, rc);
+            for (int i = 0; i < rcAmount; ++i) grid.getRowConstraints().add(rc);
     }
 
     public void layoutPanes(){
@@ -81,7 +84,7 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
     public void layoutControls() {
 
         grid.add(nameField, 1, 1, 2, 1);
-        grid.add(descriptionField, 4, 1, 2, 1);
+        grid.add(descriptionArea, 4, 1, 2, 2);
     }
 
     @Override
@@ -91,14 +94,14 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
             dataModel.getProxy().getNameProperty().addListener((observable, oldValue, newValue) -> {
                 if (!newValue.contains(";")) this.nameField.textProperty().setValue(newValue); });
             dataModel.getProxy().getDescriptionProperty().addListener((observable, oldValue, newValue) -> {
-                if (!newValue.contains(";")) this.descriptionField.textProperty().setValue(newValue); });
+                if (!newValue.contains(";")) this.descriptionArea.textProperty().setValue(newValue); });
 
             this.nameField.textProperty().addListener((observable, oldValue, newValue) -> {
                 if (!newValue.contains(";")) proxy.getNameProperty().setValue(newValue);
                 else {this.nameField.setText(oldValue);} });
-            this.descriptionField.textProperty().addListener((observable, oldValue, newValue) -> {
+            this.descriptionArea.textProperty().addListener((observable, oldValue, newValue) -> {
                 if (!newValue.contains(";")) proxy.getDescriptionProperty().setValue(newValue);
-                else {this.descriptionField.setText(oldValue); }});
+                else {this.descriptionArea.setText(oldValue); }});
         }
     }
 

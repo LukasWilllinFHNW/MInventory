@@ -19,19 +19,19 @@ import javafx.util.Callback;
 /**
  * Created by Lukas on 01.12.2015.
  */
-public class MInventoryListView extends VBox implements ViewTemplate{
+public class MInventoryListView extends ListView implements ViewTemplate{
 
     private MInventoryPresentationModel presModel;
     private MInventoryDataModel dataModel;
 
     private KeyEvent delPressed;
 
-    ListView list = new ListView();
-
     public MInventoryListView(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
 
         this.presModel = presModel;
         this.dataModel = dataModel;
+
+        this.autosize();
 
         initSequence();
     }
@@ -39,20 +39,19 @@ public class MInventoryListView extends VBox implements ViewTemplate{
     @Override
     public void initializeControls() {
 
-        list.setCellFactory(lv -> {
+        this.setCellFactory(lv -> {
             CustomListCell cell = new CustomListCell(presModel, dataModel);
             return cell ; });
     }
 
     @Override
     public void layoutControls() {
-        this.getChildren().add(list);
     }
 
 
     @Override
     public void addBindings(){
-        list.itemsProperty().bind(dataModel.getMInventoryObjectSimpleListProperty());
+        this.itemsProperty().bind(dataModel.getMInventoryObjectSimpleListProperty());
         this.disableProperty().bind(presModel.getAddDisabledProperty());
     }
 
@@ -64,7 +63,6 @@ public class MInventoryListView extends VBox implements ViewTemplate{
     @Override
     public void initializeLayout() {
 
-        list.autosize();
     }
 
     @Override

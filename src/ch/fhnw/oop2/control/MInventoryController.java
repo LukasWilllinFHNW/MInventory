@@ -7,6 +7,7 @@ import ch.fhnw.oop2.model.MInventoryStorage;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.image.Image;
 
 //com.sun.org.apache.xpath.internal.operations.String TODO: Whot iis thiis?
 import java.io.BufferedWriter;
@@ -96,7 +97,7 @@ public class MInventoryController {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         } catch (NullPointerException e) {
-            return Paths.get("/"+fileName);
+            return Paths.get("/src/ch/fhnw/oop2/control/"+fileName);
         }
     }
 
@@ -117,11 +118,14 @@ public class MInventoryController {
         String name = arguments[csv.NAME];
         String description = arguments[csv.DESCRIPTION];
         int symbolId = Integer.parseInt(arguments[csv.SYMBOL_ID]);
+
+        Image image = new Image("/resources/images/NoImage.png");
+
         if(arguments[csv.IDENTIFIER].equals(dataModel.STORAGE_IDENTIFIER)) {
-            return new MInventoryStorage(id, name, description, symbolId);
+            return new MInventoryStorage(id, name, description, image); // TODO: Image
         } else {
             //TODO: Add item to storage if storageId exists
-            return new MInventoryItem(id, name, description, symbolId);
+            return new MInventoryItem(id, name, description, image); // TODO image
         }
     }
 

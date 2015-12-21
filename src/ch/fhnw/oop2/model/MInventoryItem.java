@@ -1,6 +1,6 @@
 package ch.fhnw.oop2.model;
 
-import java.awt.*;
+import javafx.scene.image.Image;
 
 /**
  * Created by Lukas W on 17.11.2015.
@@ -14,11 +14,11 @@ public class MInventoryItem extends MInventoryObject {
      *
      * @param name Name of the item
      * @param description Description of item
-     * @param symbolId Id of symbol to use along with the item
+     * @param image or symbol to use along with the item
      */
-    public MInventoryItem(int id, String name, String description, int symbolId) {
+    public MInventoryItem(int id, String name, String description, Image image) {
 
-        super(id, name, description, symbolId); //description, symbolId, false);
+        super(id, name, description, image); //description, symbolId, false);
     }
 
     public MInventoryItem(int id, MInventoryObject object) {
@@ -27,6 +27,6 @@ public class MInventoryItem extends MInventoryObject {
 
     public static MInventoryObject emptyObject() {
 
-        return new MInventoryItem(-1, "", "", -1);
+        return new MInventoryItem(-1, "", "", null);
     }
 }

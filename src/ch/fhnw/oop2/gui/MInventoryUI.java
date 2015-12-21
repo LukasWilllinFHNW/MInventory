@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SplitPane;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.layout.*;
 
@@ -28,8 +29,10 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
 
     // List of all sub views
     private MInventoryTopBarView mInventoryTopBarView;
-    private static MInventoryListView mInventoryListView;
-    private static MInventoryDetailedView mInventoryDetailedView;
+    private MInventoryListView mInventoryListView;
+    private MInventoryDetailedView mInventoryDetailedView;
+
+    private SplitPane splitPane;
 
     /** The PresentationModel for main UI */
     private MInventoryPresentationModel presModel;
@@ -71,6 +74,7 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
     public void initializeLayout() {
 
         mInventoryTopBarView = new MInventoryTopBarView(presModel, dataModel);
+        splitPane = new SplitPane();
         mInventoryListView = new MInventoryListView(presModel, dataModel);
         mInventoryDetailedView = new MInventoryDetailedView(presModel, dataModel);
     }
@@ -78,9 +82,8 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
     public void layoutPanes() {
 
         mainPane.setTop(mInventoryTopBarView);
-
-        mainPane.setCenter(mInventoryDetailedView);
-        mainPane.setLeft(mInventoryListView);
+        mainPane.setCenter(splitPane);
+        splitPane.getItems().addAll(mInventoryListView, mInventoryDetailedView);
 
         this.getChildren().add(mainPane);
     }

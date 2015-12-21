@@ -2,6 +2,7 @@ package ch.fhnw.oop2.model;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.image.Image;
 
 import java.security.InvalidParameterException;
 import java.util.Collection;
@@ -25,9 +26,9 @@ public class MInventoryStorage extends MInventoryObject {
      * @param id id of storage
      * @param name name of the storage
      * @param description description of the storage
-     * @param symbolId Id of the symbol to use. */
-    public MInventoryStorage(int id, String name, String description, int symbolId) { //, String description, int symbolId) {
-        super(id, name, description, symbolId);
+     * @param image or symbol to use. */
+    public MInventoryStorage(int id, String name, String description, Image image) { //, String description, int symbolId) {
+        super(id, name, description, image);
         this.objectIds = FXCollections.observableArrayList();
     }
 
@@ -37,7 +38,7 @@ public class MInventoryStorage extends MInventoryObject {
     }
 
     public static MInventoryObject emptyObject() {
-        return new MInventoryStorage(-1, "", "", -1);
+        return new MInventoryStorage(-1, "", "", null);
     }
 
 

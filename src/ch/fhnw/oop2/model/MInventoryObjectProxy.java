@@ -1,5 +1,7 @@
 package ch.fhnw.oop2.model;
 
+import javafx.scene.image.Image;
+
 /**
  * Created by Lukas on 08.12.2015.
  */
@@ -17,10 +19,10 @@ public class MInventoryObjectProxy extends MInventoryObject {
      *
      * @param name name of proxyObject
      * @param description description of proxyObject
-     * @param symbolId id of symbol of proxyObject
+     * @param image image or symbol of proxyObject
      */
-    public MInventoryObjectProxy(char identifier,int id, String name, String description, int symbolId) {
-        super(-1, name, description, symbolId);
+    public MInventoryObjectProxy(char identifier,int id, String name, String description, Image image) {
+        super(-1, name, description, image);
         this.identifier = identifier;
     }
 

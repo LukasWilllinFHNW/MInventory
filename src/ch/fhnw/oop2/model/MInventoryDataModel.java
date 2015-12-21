@@ -20,7 +20,7 @@ public class MInventoryDataModel {
 
     private final IntegerProperty currentSelectedId = new SimpleIntegerProperty(-1);
 
-    private final MInventoryObjectProxy proxy = new MInventoryObjectProxy('o', -1, null, null, -1);
+    private final MInventoryObjectProxy proxy = new MInventoryObjectProxy('o', -1, null, null, null);
     private MInventoryObject temporaryObject;
 
     public final String ITEM_IDENTIFER = "i";
@@ -47,7 +47,7 @@ public class MInventoryDataModel {
         this.select(0);
     }
 
-    public void create() {
+    public void createNewObject() {
         int newID;
         try {
             newID = mInventoryObjectList.stream()
@@ -70,7 +70,7 @@ public class MInventoryDataModel {
         select(newID);
     }
 
-    public void cancel() {
+    public void cancelNewObject() {
         unselect(0);
         select(currentSelectedId.get());
     }
@@ -93,6 +93,7 @@ public class MInventoryDataModel {
         if (oldObject != null) {
             proxy.getNameProperty().unbindBidirectional(oldObject.getNameProperty());
             proxy.getDescriptionProperty().unbindBidirectional(oldObject.getDescriptionProperty());
+            proxy.getImageProperty().unbindBidirectional(oldObject.getImageProperty());
             proxy.setId(-1);
             //if(oldID < 1) this.currentSelectedId.setValue(-1);
             proxy.setId('o');
@@ -106,6 +107,7 @@ public class MInventoryDataModel {
         if (newObject != null) {
             proxy.getNameProperty().bindBidirectional(newObject.getNameProperty());
             proxy.getDescriptionProperty().bindBidirectional(newObject.getDescriptionProperty());
+            proxy.getImageProperty().bindBidirectional(newObject.getImageProperty());
             proxy.setId(newObject.getId());
             if(newID > 0 )this.currentSelectedId.setValue(newObject.getId());
             proxy.setId('o');

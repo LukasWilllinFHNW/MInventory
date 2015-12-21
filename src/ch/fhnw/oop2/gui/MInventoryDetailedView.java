@@ -69,7 +69,7 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
 
     @Override
     public void initializeLayout() {
-        mInventoryPreviewView = new MInventoryPreviewView(dataModel);
+        mInventoryPreviewView = new MInventoryPreviewView(presModel, dataModel);
         grid = new GridPane();
             for (int i = 0; i < ccAmount; ++i) grid.getColumnConstraints().add(cc);
             for (int i = 0; i < rcAmount; ++i) grid.getRowConstraints().add(rc);
@@ -116,6 +116,6 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
     }
 
     public void applyStylesheet() {
-        grid.setId("detailedViewGrid");
+        this.setId("detailedViewGrid");
     }
 }

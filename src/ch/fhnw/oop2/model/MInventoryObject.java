@@ -2,14 +2,10 @@ package ch.fhnw.oop2.model;
 
 //import java.lang.Exception.*;
 import javafx.beans.property.*;
-import javafx.css.SimpleStyleableIntegerProperty;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 import java.lang.*;
-import java.security.InvalidParameterException;
-import java.awt.Color;
-import java.io.File;
-import java.util.Vector;
 
 /**
  * Created by Lukas W on 17.11.2015.
@@ -18,7 +14,8 @@ public abstract class MInventoryObject {
 
     private final int id;
     private StringProperty name;
-    private File picture;
+    private Image image;
+    private ObjectProperty imageProperty = new SimpleObjectProperty<>();
     private IntegerProperty symbolId;
     private StringProperty description;
     /** Weight of object in kilo gram*/
@@ -37,18 +34,18 @@ public abstract class MInventoryObject {
     // --- CONSTRUCTORS ---
     /**
      * Create a new MInventoryObject */
-    public MInventoryObject(int id, String name, String description, int symbolId) {
+    public MInventoryObject(int id, String name, String description, Image image) {
         this.id = id;
         this.name = new SimpleStringProperty(name);
         this.description = new SimpleStringProperty(description);
-        this.symbolId = new SimpleIntegerProperty(symbolId);
+        this.imageProperty.setValue(image);
     }
 
     public MInventoryObject(int id, MInventoryObject object) {
         this.id = id;
         this.name = new SimpleStringProperty(object.getName());
         this.description = new SimpleStringProperty(object.getDescription());
-        this.symbolId = new SimpleIntegerProperty(object.getSymbolId());
+        this.imageProperty.setValue(object.getImage());
     }
 
 
@@ -59,7 +56,6 @@ public abstract class MInventoryObject {
         info.append(this.id + ";");
         info.append(this.getName() + ";");
         info.append(this.getDescription() + ";");
-        info.append(this.getSymbolId() + ";");
 
         return info.toString();
     }
@@ -70,13 +66,13 @@ public abstract class MInventoryObject {
         return name.getValue();
     }
     public String getDescription() { return description.getValue(); }
-    public int getSymbolId() { return symbolId.getValue(); }
+    public Image getImage() { return (Image)imageProperty.getValue(); }
     public int getId() { return id; }
 
     // --- PROPERTY GETTER ---
     public StringProperty getNameProperty() { return this.name; }
     public StringProperty getDescriptionProperty() { return this.description; }
-    public IntegerProperty getSymbolIdProperty() { return this.symbolId; }
+    public ObjectProperty<Image> getImageProperty() { return this.imageProperty; }
 
     // --- SETTER ---
     public void setName(String name) {

@@ -87,8 +87,8 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
         this.deleteButton.setOnMouseClicked(event -> {
             dataModel.delete(); });
 
-        this.saveButton.setOnMouseClicked(event1 -> {
-            dataModel.create(); });
+        this.saveButton.setOnMouseClicked(event -> {
+            dataModel.save(); });
 
         this.askIfItem.setOnMouseClicked(event -> {
             overlay.close();
@@ -115,12 +115,12 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
         this.createButton.setOnMouseClicked(event -> {
             presModel.enterEditMode();
             overlay.close();
-            dataModel.create();
+            dataModel.createNewObject();
         });
         this.cancelButton.setOnMouseClicked(event -> {
             presModel.enterEditMode();
             overlay.close();
-            dataModel.cancel();
+            dataModel.cancelNewObject();
         });
     }
 

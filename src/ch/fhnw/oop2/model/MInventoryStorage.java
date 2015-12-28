@@ -46,7 +46,7 @@ public class MInventoryStorage extends MInventoryObject {
     /**
      * Adds an MInventoryObject if it is not bigger then the inventory itself.
      * @param objectId the item or storage to put inside */
-    public void addObject(int objectId) throws MInventoryException {
+    public void addObjectById(int objectId) throws MInventoryException {
         //TODO: Check that object fits inside this storage
         this.objectIds.add(objectId);
 

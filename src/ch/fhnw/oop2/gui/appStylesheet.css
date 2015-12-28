@@ -14,7 +14,7 @@
 #overlay_Background {
     -fx-effect: dropshadow(two-pass-box , darkgray, 40, 0.0 , 0, 0) ;
 	-fx-background-color: derive(lightgrey, -20%); 
-	-fx-alignment: center;
+	-fx-alignment: top-center ;
   	-fx-background-insets: 40;
  	-fx-background-radius: 10;
 }
@@ -22,7 +22,7 @@
 #overlay_Container {
 	-fx-padding: 40;
   	-fx-spacing: 40;
-  	-fx-alignment: center;
+  	-fx-alignment: top-center;
   	-fx-background-color: linear-gradient(derive(lightgrey, 20%), lightgrey);
  	-fx-background-insets: 40;
   	-fx-background-radius: 10;

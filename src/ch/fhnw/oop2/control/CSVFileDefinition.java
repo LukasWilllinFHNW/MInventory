@@ -10,6 +10,5 @@ public class CSVFileDefinition {
     public final int OBJECT_ID = 2;
     public final int NAME = 3;
     public final int DESCRIPTION = 4;
-    public final int SYMBOL_ID = 5;
 
 }

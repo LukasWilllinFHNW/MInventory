@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -26,6 +27,8 @@ public class Overlay extends Stage implements ViewTemplate {
     private VBox container;
     private Scene scene;
 
+    Button backButton;
+
 
     // --- CONSTRUCTORS ---
     public Overlay(MInventoryPresentationModel presModel, MInventoryDataModel dataModel, double height, double width){
@@ -42,6 +45,10 @@ public class Overlay extends Stage implements ViewTemplate {
         super.setY(presModel.getY() + (presModel.getHeightProperty().get()/2) - (super.getHeight()/2) );
 
         this.initStyle(StageStyle.TRANSPARENT);
+
+        HBox box = new HBox();
+            box.getChildren().add(backButton);
+        addNode(box);
 
         this.open();
 
@@ -64,7 +71,9 @@ public class Overlay extends Stage implements ViewTemplate {
 
     // --- UI INIT ---
     @Override
-    public void initializeControls() { }
+    public void initializeControls() {
+        backButton = new Button("<-");
+    }
 
     @Override
     public void initializeLayout() {
@@ -74,6 +83,7 @@ public class Overlay extends Stage implements ViewTemplate {
             container.autosize();
 
         stackPane = new StackPane(container);
+            stackPane.setAlignment(Pos.TOP_CENTER);
             stackPane.autosize();
     }
 
@@ -95,6 +105,10 @@ public class Overlay extends Stage implements ViewTemplate {
     @Override
     public void addEvents() {
         this.container.setOnMouseClicked(event -> {
+            presModel.enterEditMode();
+            close();
+        });
+        backButton.setOnMouseClicked(event -> {
             presModel.enterEditMode();
             close();
         });

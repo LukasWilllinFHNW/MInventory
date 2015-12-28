@@ -1,8 +1,6 @@
 package ch.fhnw.oop2.gui;
 
-import ch.fhnw.oop2.model.MInventoryDataModel;
-import ch.fhnw.oop2.model.MInventoryObject;
-import ch.fhnw.oop2.model.MInventoryPresentationModel;
+import ch.fhnw.oop2.model.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
@@ -57,6 +55,15 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
     private void addEvents() {
         this.setOnMouseClicked( (MouseEvent event) -> {
             if (this.getItem() != null) dataModel.updateSelection(this.getItem().getId()); });
+        this.setOnDragDropped( event -> {
+            if (super.getItem() instanceof MInventoryStorage &&(MInventoryObject)event.getAcceptingObject() != null) {
+                try {
+                    ((MInventoryStorage) super.getItem()).addObjectById((((MInventoryObject) event.getAcceptingObject()).getId()));
+                } catch (MInventoryException e) {
+
+                }
+            };
+        });
     }
 
     private void addListeners() {

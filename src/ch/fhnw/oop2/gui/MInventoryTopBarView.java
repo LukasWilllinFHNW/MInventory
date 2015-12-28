@@ -54,18 +54,6 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
             deleteButton.disableProperty().bind(presModel.getAddDisabledProperty());
         this.saveButton = new Button("save");
             saveButton.disableProperty().bind(presModel.getAddDisabledProperty());
-
-        this.createButton = new Button("create");
-            createButton.disableProperty().bind(presModel.getSaveDisabledProperty());
-        this.cancelButton = new Button("cancel");
-            cancelButton.disableProperty().bind(presModel.getSaveDisabledProperty());
-
-        this.askIfItem = new Button();
-            askIfItem.setText("an item");
-            askIfItem.setPadding(new Insets(6, 6, 3, 6));
-        this.askIfStorage = new Button();
-            askIfStorage.setText("a storage");
-            askIfStorage.setPadding(new Insets(3, 6, 6, 6));
     }
 
     @Override
@@ -78,10 +66,7 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
     public void addEvents() {
 
         this.addButton.setOnMouseClicked(event -> {
-            presModel.doBlur();
-            overlay = new Overlay(presModel, dataModel, presModel.getHeightProperty().get()-400, presModel.getWidthProperty().get()-400);
-            overlay.addNode(askIfItem);
-            overlay.addNode(askIfStorage);
+            createNewObjectDialog();
         });
 
         this.deleteButton.setOnMouseClicked(event -> {
@@ -89,28 +74,48 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
 
         this.saveButton.setOnMouseClicked(event -> {
             dataModel.save(); });
+    }
+
+    public void addListeners() {
+
+    }
+
+    private void createNewObjectDialog() {
+
+        presModel.doBlur();
+
+        overlay = new Overlay(presModel, dataModel, presModel.getHeightProperty().get()-400, presModel.getWidthProperty().get()-400);
+
+        this.askIfItem = new Button();
+            askIfItem.setText("an item");
+            askIfItem.setPadding(new Insets(6, 6, 3, 6));
+        this.askIfStorage = new Button();
+            askIfStorage.setText("a storage");
+            askIfStorage.setPadding(new Insets(3, 6, 6, 6));
 
         this.askIfItem.setOnMouseClicked(event -> {
-            overlay.close();
-            presModel.enterAddingMode();
             dataModel.addNewObject('i');
-            overlay = new Overlay(presModel, dataModel, presModel.getHeightProperty().get()-200, presModel.getWidthProperty().get()-200);
-            overlay.addNode(createButton);
-            overlay.addNode(cancelButton);
-            overlay.addNode(new MInventoryDetailedView(presModel, dataModel));
+            createInputDialog();
         });
         this.askIfStorage.setOnMouseClicked(event -> {
-            overlay.close();
-            presModel.enterAddingMode();
             dataModel.addNewObject('s');
-
-            HBox box = new HBox();
-            box.getChildren().addAll(createButton, cancelButton);
-
-            overlay = new Overlay(presModel, dataModel, presModel.getHeightProperty().get()-200, presModel.getWidthProperty().get()-200);
-            overlay.addNode(box);
-            overlay.addNode(new MInventoryDetailedView(presModel, dataModel));
+            createInputDialog();
         });
+
+        HBox box = new HBox();
+            box.getChildren().addAll(askIfItem, askIfStorage);
+
+        overlay.addNode(box);
+    }
+
+    private void createInputDialog() {
+
+        overlay.close();
+
+        this.createButton = new Button("create");
+        createButton.disableProperty().bind(presModel.getSaveDisabledProperty());
+        this.cancelButton = new Button("cancel");
+        cancelButton.disableProperty().bind(presModel.getSaveDisabledProperty());
 
         this.createButton.setOnMouseClicked(event -> {
             presModel.enterEditMode();
@@ -122,9 +127,13 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
             overlay.close();
             dataModel.cancelNewObject();
         });
-    }
 
-    public void addListeners() {
+        HBox box = new HBox();
+            box.getChildren().addAll(createButton, cancelButton);
 
+        overlay = new Overlay(presModel, dataModel, 600, 600);
+        presModel.enterAddingMode();
+        overlay.addNode(box);
+        overlay.addNode(new MInventoryDetailedView(presModel, dataModel));
     }
 }

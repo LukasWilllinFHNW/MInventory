@@ -1,6 +1,7 @@
 package ch.fhnw.oop2.model;
 
 //import java.lang.Exception.*;
+import ch.fhnw.oop2.gui.CustomImage;
 import javafx.beans.property.*;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -15,7 +16,7 @@ public abstract class MInventoryObject {
     private final int id;
     private StringProperty name;
     private Image image;
-    private ObjectProperty imageProperty = new SimpleObjectProperty<>();
+    private ObjectProperty imageProperty = new SimpleObjectProperty<CustomImage>();
     private IntegerProperty symbolId;
     private StringProperty description;
     /** Weight of object in kilo gram*/
@@ -34,7 +35,7 @@ public abstract class MInventoryObject {
     // --- CONSTRUCTORS ---
     /**
      * Create a new MInventoryObject */
-    public MInventoryObject(int id, String name, String description, Image image) {
+    public MInventoryObject(int id, String name, String description, CustomImage image) {
         this.id = id;
         this.name = new SimpleStringProperty(name);
         this.description = new SimpleStringProperty(description);
@@ -72,7 +73,7 @@ public abstract class MInventoryObject {
     // --- PROPERTY GETTER ---
     public StringProperty getNameProperty() { return this.name; }
     public StringProperty getDescriptionProperty() { return this.description; }
-    public ObjectProperty<Image> getImageProperty() { return this.imageProperty; }
+    public ObjectProperty<CustomImage> getImageProperty() { return this.imageProperty; }
 
     // --- SETTER ---
     public void setName(String name) {

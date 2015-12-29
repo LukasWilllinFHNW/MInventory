@@ -11,4 +11,6 @@ public class CSVFileDefinition {
     public final int NAME = 3;
     public final int DESCRIPTION = 4;
 
+    public final String FILE_HEADER = "containerId;identifier;objectId;name;description;";
+
 }

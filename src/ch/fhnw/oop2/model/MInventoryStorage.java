@@ -1,5 +1,6 @@
 package ch.fhnw.oop2.model;
 
+import ch.fhnw.oop2.gui.CustomImage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
@@ -27,7 +28,7 @@ public class MInventoryStorage extends MInventoryObject {
      * @param name name of the storage
      * @param description description of the storage
      * @param image or symbol to use. */
-    public MInventoryStorage(int id, String name, String description, Image image) { //, String description, int symbolId) {
+    public MInventoryStorage(int id, String name, String description, CustomImage image) { //, String description, int symbolId) {
         super(id, name, description, image);
         this.objectIds = FXCollections.observableArrayList();
     }

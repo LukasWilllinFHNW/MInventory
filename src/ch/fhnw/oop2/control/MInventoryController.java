@@ -1,5 +1,6 @@
 package ch.fhnw.oop2.control;
 
+import ch.fhnw.oop2.gui.CustomImage;
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryItem;
 import ch.fhnw.oop2.model.MInventoryObject;
@@ -7,19 +8,14 @@ import ch.fhnw.oop2.model.MInventoryStorage;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.image.Image;
 
 //com.sun.org.apache.xpath.internal.operations.String TODO: Whot iis thiis?
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,9 +27,14 @@ public class MInventoryController {
 
     private final CSVFileDefinition csv = new CSVFileDefinition();
 
-    private final String FILENAME = "MInventorySave.min";
+    private final String CSV_FILE_NAME = "MInventorySave.min";
+    private final String IMAGE_FOLDER_NAME = "images";
+    private final String DATA_FOLDER_NAME = "MInventory";
 
     private final String SPLITTER = ";";
+
+    private final String[] SAMPLE_STORAGE = {"-1", "s", "1", "Your first storage :)", "Try to drag item into storage."};
+    private final String[] SAMPLE_ITEM = {"-1", "i", "2", "Your first item :D", "Try to drag me into the storage."};
 
     private MInventoryDataModel dataModel;
 
@@ -46,6 +47,8 @@ public class MInventoryController {
     }
 
     private final boolean filesInSameFolder = false;
+
+    private ArrayList<String> pathAsList;
 
 
     // --- CONSTRUCTORs ---
@@ -62,21 +65,26 @@ public class MInventoryController {
     public SimpleListProperty<MInventoryObject> readObjectsFromFile() {
 
         System.getProperties().list(System.out);
-
-        List<MInventoryObject> objectList = getStreamOfLines(FILENAME)
+        List<MInventoryObject> objectList;
+        try {
+            objectList = getStreamOfLines(CSV_FILE_NAME)
                     .skip(1)
                     .map(s -> createMInventoryObject(s.split(";")))
                     .collect(Collectors.toList());
+        } catch (NullPointerException npe) {
+            objectList = new ArrayList<>();
+            objectList.add(createMInventoryObject(SAMPLE_STORAGE));
+            objectList.add(createMInventoryObject(SAMPLE_ITEM));
+        }
         ObservableList<MInventoryObject> observableList = FXCollections.observableArrayList(objectList);
-
         mInventoryObjectList = new SimpleListProperty<>();
         mInventoryObjectList.setValue(observableList);
         return mInventoryObjectList;
     }
 
     public void writeObjectsToFile() {
-        try (BufferedWriter writer = Files.newBufferedWriter(getPath(FILENAME, filesInSameFolder), StandardCharsets.UTF_8) ) {
-            writer.write("containerId;identifier;objectId;name;description;");
+        try (BufferedWriter writer = Files.newBufferedWriter(getPath(CSV_FILE_NAME, filesInSameFolder), StandardCharsets.UTF_8) ) {
+            writer.write(csv.FILE_HEADER);
             writer.newLine();
             mInventoryObjectList.stream().forEach(object -> {
                 try {
@@ -95,29 +103,38 @@ public class MInventoryController {
         }
     }
 
+    public void copyImage(CustomImage i, String newFileName) {
+        List<String> list = pathAsList;
+        list.add(IMAGE_FOLDER_NAME);
+        String target = composePath(pathAsList, newFileName);
+        CopyOption[] options = new CopyOption[]{
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.COPY_ATTRIBUTES
+        };
+        try {
+            Files.copy(Paths.get(i.getUrl()), Paths.get(target), options);
+        } catch (IOException ioe) {
+            System.out.println(ioe.getMessage() + ioe.getStackTrace());
+        }
+    }
+
+
+    // --- HELPERS ---
+
     private Path getPath(String fileName, boolean locatedInSameFolder) {
         ArrayList<String> decomposedPath;
         Path p;
         try {
             if(locatedInSameFolder) {
-                //fileName = "/" + fileName;
                 return Paths.get(getClass().getResource(fileName).toURI());
             } else {
-                // p = Paths.get(getClass().getResource(fileName).toURI());
-
                 // Get all folders from a path as list (user home)
                 decomposedPath = decomposePath(Paths.get(System.getProperty("user.home")), false);
-
-                StringBuffer sb = new StringBuffer();
                 decomposedPath.add("MInventory");
 
-                // Compose string to files
-                for (String folderName : decomposedPath) {
-                    sb.append(folderName);
-                    sb.append(File.separatorChar);
-                }
-                sb.append(fileName);
-                return Paths.get(sb.toString());
+                pathAsList = decomposedPath;
+                // Compose strings to path and return it
+                return Paths.get(composePath(decomposedPath, null));
             }
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
@@ -144,14 +161,33 @@ public class MInventoryController {
                 path = path.getParent();
             } catch (NullPointerException npe2) { break; }
         }
-        // Setup sort
+        // Setup sort order
         Object[] sArray = sList.toArray();
         sList = new ArrayList<String>();
-        // Sort list
+        // change sort order of list
         for (int i = sArray.length-1; i >= 0; --i) {
             sList.add((String)sArray[i]);
         }
         return sList;
+    }
+
+    /**
+     * Composes a path as a string from a list of folder names
+     * @param list list with names of folders in the right order without file seperators
+     *             which should be composed to a string
+     * @param additionalFileName Include file name if you need else null if only path is needed
+     * @return the path as string
+     */
+    private String composePath(List<String> list, String additionalFileName){
+        StringBuffer sb = new StringBuffer();
+
+        for (String folderName : list) {
+            sb.append(folderName);
+            sb.append(File.separatorChar);
+        }
+        if (additionalFileName != null) sb.append(additionalFileName);
+
+        return sb.toString();
     }
 
     private Stream<String> getStreamOfLines(String fileName) {
@@ -183,11 +219,11 @@ public class MInventoryController {
                 System.out.println(e.getMessage() + "\n" + e.getStackTrace().toString() + "\n" + e.getCause());
                 description = new String("");
             }
-        Image image;
-            try { image = new Image("../resources/images/" + id + "-1.jpg");
+        CustomImage image;
+            try { image = new CustomImage("../resources/images/" + id + "-1.jpg");
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage() + "\n" + e.getStackTrace());
-                image = new Image("/resources/images/NoImage.png");
+                image = new CustomImage("/resources/images/NoImage.png");
             }
 
         if(arguments[csv.IDENTIFIER].equals(dataModel.STORAGE_IDENTIFIER)) {
@@ -197,5 +233,4 @@ public class MInventoryController {
             return new MInventoryItem(id, name, description, image); // TODO image
         }
     }
-
 }

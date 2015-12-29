@@ -1,6 +1,7 @@
 package ch.fhnw.oop2.model;
 
 import ch.fhnw.oop2.control.MInventoryController;
+import ch.fhnw.oop2.gui.CustomImage;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
@@ -149,6 +150,12 @@ public class MInventoryDataModel {
         info.append(requestedObject.infoAsLine());
 
         return info.toString();
+    }
+
+    public void copyImage(CustomImage ci) {
+        String fileExtension = ci.getUrl().substring(ci.getUrl().lastIndexOf('.'));
+        String newFileName = currentSelectedId + "-1" + fileExtension;
+        controller.copyImage(ci, newFileName);
     }
 
 

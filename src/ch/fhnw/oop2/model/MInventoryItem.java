@@ -1,5 +1,6 @@
 package ch.fhnw.oop2.model;
 
+import ch.fhnw.oop2.gui.CustomImage;
 import javafx.scene.image.Image;
 
 /**
@@ -16,7 +17,7 @@ public class MInventoryItem extends MInventoryObject {
      * @param description Description of item
      * @param image or symbol to use along with the item
      */
-    public MInventoryItem(int id, String name, String description, Image image) {
+    public MInventoryItem(int id, String name, String description, CustomImage image) {
 
         super(id, name, description, image); //description, symbolId, false);
     }

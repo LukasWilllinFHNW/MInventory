@@ -24,7 +24,7 @@ public class MInventoryPreviewView extends HBox implements ViewTemplate{
     private MInventoryDataModel dataModel;
 
     private Box box;
-    private ImageView logo;
+    private ImageView cImageView;
     private Circle circle;
 
     public MInventoryPreviewView(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
@@ -48,17 +48,15 @@ public class MInventoryPreviewView extends HBox implements ViewTemplate{
             circle.setRadius(75);
             circle.setCenterX(75);
             circle.setCenterY(75);
-        logo = new ImageView();
-            logo.setFitHeight(150);
-            logo.setFitWidth(150);
-            logo.setPreserveRatio(true);
-            logo.setClip(circle);
+        cImageView = new CustomImageView(presModel, dataModel);
+            cImageView.setClip(circle);
+
     }
 
     @Override
     public void layoutPanes() {
 
-        this.getChildren().add(logo);
+        this.getChildren().add(cImageView);
     }
 
     @Override
@@ -72,7 +70,6 @@ public class MInventoryPreviewView extends HBox implements ViewTemplate{
 
     @Override
     public void addBindings() {
-        logo.imageProperty().bind(dataModel.getProxy().getImageProperty());
     }
 
     @Override

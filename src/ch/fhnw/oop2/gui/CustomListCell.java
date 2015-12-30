@@ -7,7 +7,10 @@ import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -18,8 +21,9 @@ import javafx.scene.shape.Circle;
 public class CustomListCell extends ListCell<MInventoryObject>	{
 
     ChangeListener<String> nameChangeListener;
-    MInventoryPresentationModel presModel;
+    ChangeListener<Image> imageChangeListener;
 
+    MInventoryPresentationModel presModel;
     MInventoryDataModel dataModel;
 
     public CustomListCell(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
@@ -37,18 +41,23 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
 
         if (super.getItem() != null && nameChangeListener != null) {
             super.getItem().getNameProperty().removeListener(nameChangeListener);
+            getItem().getImageProperty().removeListener(imageChangeListener);
         }
 
         super.updateItem(mInventoryObject, empty);
         super.setGraphic(new Circle(10, 10, 20, Color.WHITESMOKE));
+
         super.setText(null);
 
         if (super.getItem() != null) {
             nameChangeListener = (observable, oldValue, newValue) -> {
                 super.setText(newValue); };
-            super.setGraphic(new Circle(10, 10, 20, Color.AQUA));
+            imageChangeListener = (observable, oldValue, newValue) -> {
+                updateGraphic(); };
+            updateGraphic();
             super.textProperty().setValue( getItem().getName());
             super.getItem().getNameProperty().addListener(nameChangeListener);
+            super.getItem().getImageProperty().addListener(imageChangeListener);
         }
     }
 
@@ -72,5 +81,22 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
             if (newValue && super.getItem() != null) {
                 dataModel.updateSelection(super.getItem().getId());
             } });
+    }
+
+    private void updateGraphic(){
+        if (getItem() != null) {
+            ImageView cImageView = new CustomImageView(presModel, dataModel);
+            ImageViewPane imageViewPane;
+                cImageView.setImage(getItem().getImage());
+                cImageView.setPreserveRatio(false);
+                cImageView.setFitHeight(42);
+                cImageView.setFitWidth(42);
+            imageViewPane = new ImageViewPane(cImageView);
+                imageViewPane.setMaxHeight(42);
+                imageViewPane.setPrefSize(42, 42);
+                imageViewPane.setMaxWidth(42);
+                cImageView.setClip(new Circle(cImageView.getFitHeight() / 2 - 1, cImageView.getFitWidth() / 2 - 1, 20));
+            super.setGraphic(imageViewPane);
+        }
     }
 }

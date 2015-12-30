@@ -27,8 +27,8 @@ public class MInventoryApp extends Application{
     private MInventoryController mInventoryController;
     private MInventoryCmd mInventoryCmd;
 
-    private int startHeight = 600;
-    private int startWidth = 800;
+    private int startHeight = 800;
+    private int startWidth = 1000;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -54,8 +54,8 @@ public class MInventoryApp extends Application{
         primaryStage.setScene(scene);
         primaryStage.setHeight(startHeight);
         primaryStage.setWidth(startWidth);
-        primaryStage.setMinHeight(startHeight-150);
-        primaryStage.setMinWidth(startWidth-200);
+        primaryStage.setMinHeight(startHeight-300);
+        primaryStage.setMinWidth(startWidth-400);
 
         primaryStage.xProperty().addListener((observable, oldValue, newValue) -> {
             presModel.setX(newValue.doubleValue());
@@ -83,3 +83,78 @@ public class MInventoryApp extends Application{
         launch(args);
     }
 }
+
+// Actual class ends here
+// Further down follows an extract from: https://bugs.openjdk.java.net/secure/attachment/40457/Bug.java
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * This is just to complete documentation for classes MediaViewPane and ImageViewPane
+ *
+ * bug posted on https://bugs.openjdk.java.net/browse/JDK-8091216
+ * creation date: 2012-05-03 08:45
+ * last update date: 2015-06-12 15:54
+ * accessed on Dec 29, 2015
+ */
+
+
+/*
+
+import javafx.application.Application;
+        import javafx.scene.Scene;
+        import javafx.scene.control.SplitPane;
+        import javafx.scene.control.SplitPaneBuilder;
+        import javafx.scene.image.ImageView;
+        import javafx.scene.media.Media;
+        import javafx.scene.media.MediaPlayer;
+        import javafx.scene.media.MediaView;
+        import javafx.stage.Stage;
+
+
+public class Bug extends Application {
+
+    static {
+//        System.setProperty("http.proxyHost", "");
+//        System.setProperty("http.proxyPort", "");
+    }
+
+    @Override public void start(Stage stage) {
+        MediaPlayer mediaPlayer = new MediaPlayer(new Media("http://download.oracle.com/otndocs/products/javafx/oow2010-2.flv"));
+        mediaPlayer.play();
+        ImageView imageView = new ImageView("http://www.oracleimg.com/us/assets/oralogo-small.gif");
+        imageView.setPreserveRatio(true);
+
+        SplitPane pane = SplitPaneBuilder.create()
+                .items(
+                        new ImageViewPane(imageView),
+                        new MediaViewPane(new MediaView(mediaPlayer))
+                ).build();
+
+        Scene scene = new Scene(pane);
+
+        stage.setScene(scene);
+        stage.show();
+
+    }
+
+    /**
+     * @param args the command line arguments
+     * /
+    public static void main(String[] args) {
+        Application.launch(args);
+    }
+} */

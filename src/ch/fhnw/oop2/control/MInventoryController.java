@@ -64,7 +64,6 @@ public class MInventoryController {
      */
     public SimpleListProperty<MInventoryObject> readObjectsFromFile() {
 
-        System.getProperties().list(System.out);
         List<MInventoryObject> objectList;
         try {
             objectList = getStreamOfLines(CSV_FILE_NAME)
@@ -104,17 +103,17 @@ public class MInventoryController {
     }
 
     public void copyImage(CustomImage i, String newFileName) {
-        List<String> list = pathAsList;
-        list.add(IMAGE_FOLDER_NAME);
+        List<String> list = (List<String>) pathAsList.clone();
+            list.add(IMAGE_FOLDER_NAME);
         String target = composePath(pathAsList, newFileName);
         CopyOption[] options = new CopyOption[]{
                 StandardCopyOption.REPLACE_EXISTING,
                 StandardCopyOption.COPY_ATTRIBUTES
         };
         try {
-            Files.copy(Paths.get(i.getUrl()), Paths.get(target), options);
+            Files.copy(Paths.get(i.getPath()), Paths.get(target), options);
         } catch (IOException ioe) {
-            System.out.println(ioe.getMessage() + ioe.getStackTrace());
+            System.out.println(ioe.getMessage() + " " + ioe.toString() + ioe.getLocalizedMessage());
         }
     }
 
@@ -134,7 +133,7 @@ public class MInventoryController {
 
                 pathAsList = decomposedPath;
                 // Compose strings to path and return it
-                return Paths.get(composePath(decomposedPath, null));
+                return Paths.get(composePath(decomposedPath, fileName));
             }
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
@@ -186,7 +185,6 @@ public class MInventoryController {
             sb.append(File.separatorChar);
         }
         if (additionalFileName != null) sb.append(additionalFileName);
-
         return sb.toString();
     }
 
@@ -220,10 +218,18 @@ public class MInventoryController {
                 description = new String("");
             }
         CustomImage image;
-            try { image = new CustomImage("../resources/images/" + id + "-1.jpg");
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage() + "\n" + e.getStackTrace());
-                image = new CustomImage("/resources/images/NoImage.png");
+            try {
+                List<String> list = (List<String>) pathAsList.clone();
+                    list.add(IMAGE_FOLDER_NAME);
+                File testFile = new File(Paths.get(composePath(list, ("" + id + "-1.jpg"))).toUri());
+                if (testFile.exists())
+                    image = new CustomImage(Paths.get(composePath(list, ("" + id + "-1.jpg"))).toUri().toString(), composePath(list, ("" + id + "-1.jpg")));
+                else
+                    throw new InvalidPathException("Image not found", "" + id + "-1.jpg" + " in " + composePath(list, null));
+            } catch (InvalidPathException ipe) {
+                System.out.println(ipe.getMessage() + "\n" + ipe.getStackTrace());
+                //image = new CustomImage(Paths.get("/resources/images/NoImage.png").toUri().toString(), "/resources/images/NoImage.png");
+                image = new CustomImage("/resources/images/NoImage.png", "/resources/images/NoImage.png");
             }
 
         if(arguments[csv.IDENTIFIER].equals(dataModel.STORAGE_IDENTIFIER)) {

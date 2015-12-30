@@ -154,7 +154,7 @@ public class MInventoryDataModel {
 
     public void copyImage(CustomImage ci) {
         String fileExtension = ci.getUrl().substring(ci.getUrl().lastIndexOf('.'));
-        String newFileName = currentSelectedId + "-1" + fileExtension;
+        String newFileName = currentSelectedId.get() + "-1" + fileExtension;
         controller.copyImage(ci, newFileName);
     }
 

@@ -18,8 +18,16 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*
+ * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ */
+
 /**
- * Created by Lukas on 28.12.2015.
+ * Source from: https://blog.idrsolutions.com/2015/05/how-to-implement-drag-and-drop-function-in-a-javafx-application/
+ * creation date: May 5, 2015
+ * accessed on Dec 28, 2015
+ * author: Ernest Duodu
  */
 public class CustomImageView extends ImageView implements ViewTemplate {
 
@@ -44,8 +52,6 @@ public class CustomImageView extends ImageView implements ViewTemplate {
 
     @Override
     public void initializeLayout() {
-        this.setFitHeight(150);
-        this.setFitWidth(150);
         this.setPreserveRatio(true);
         this.setStyle("-fx-background-color: #adbfff");
     }
@@ -62,7 +68,6 @@ public class CustomImageView extends ImageView implements ViewTemplate {
 
     @Override
     public void addBindings() {
-        this.imageProperty().bind(dataModel.getProxy().getImageProperty());
     }
 
     @Override
@@ -95,6 +100,10 @@ public class CustomImageView extends ImageView implements ViewTemplate {
         });
     }
 
+    public void connectToModel() {
+        this.imageProperty().bind(dataModel.getProxy().getImageProperty());
+    }
+
     void addImage(CustomImage ci){
 
         dataModel.copyImage(ci);
@@ -112,14 +121,9 @@ public class CustomImageView extends ImageView implements ViewTemplate {
                 @Override
                 public void run() {
                     System.out.println(file.getAbsolutePath());
-                    // try {
-                        CustomImage ci = new CustomImage(file.toURI().toString());
-                        //Image customImage = new Image(new FileInputStream(file.getAbsolutePath()));
+                    CustomImage ci = new CustomImage(file.toURI().toString(), file.getPath());
 
-                        addImage(ci);
-                    /* } catch (FileNotFoundException ex) {
-                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-                    } */
+                    addImage(ci);
                 }
             });
         }

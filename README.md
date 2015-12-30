@@ -9,6 +9,12 @@ MInventory/images/
 
 ## Versions
 
+### MInventory_0.4
+1. Added drag and drop support to add images from types .jpg .png
+2. Refactoring of code
+3. Bug fix
+
+
 ### MInventory_0.3
 
 #### Changes

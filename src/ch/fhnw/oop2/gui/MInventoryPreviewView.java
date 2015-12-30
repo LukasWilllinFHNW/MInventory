@@ -16,7 +16,7 @@ import javafx.scene.image.Image;
 /**
  * Created by Lukas on 02.12.2015.
  */
-public class MInventoryPreviewView extends HBox implements ViewTemplate{
+public class MInventoryPreviewView extends VBox implements ViewTemplate{
 
     private MInventoryObject mInventoryObject;
 
@@ -25,6 +25,8 @@ public class MInventoryPreviewView extends HBox implements ViewTemplate{
 
     private Box box;
     private ImageView cImageView;
+    private ImageViewPane imageViewPane;
+    private StackPane root;
     private Circle circle;
 
     public MInventoryPreviewView(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
@@ -45,27 +47,34 @@ public class MInventoryPreviewView extends HBox implements ViewTemplate{
     @Override
     public void initializeLayout() {
         circle = new Circle();
-            circle.setRadius(75);
-            circle.setCenterX(75);
-            circle.setCenterY(75);
+        root = new StackPane();
         cImageView = new CustomImageView(presModel, dataModel);
             cImageView.setClip(circle);
-
+            ((CustomImageView) cImageView).connectToModel();
+        imageViewPane = new ImageViewPane(cImageView);
+            circle.setRadius(imageViewPane.getHeight()/2);
+            circle.setCenterY(imageViewPane.getHeight()/2);
+            circle.setCenterX(imageViewPane.getHeight()/2);
     }
 
     @Override
     public void layoutPanes() {
-
-        this.getChildren().add(cImageView);
+        root.getChildren().add(imageViewPane);
+        this.getChildren().add(root);
+        this.setVgrow(root, Priority.ALWAYS);
     }
 
     @Override
     public void layoutControls() {
-
     }
 
     @Override
     public void addListeners() {
+        imageViewPane.heightProperty().addListener((observable, oldValue, newValue) -> {
+            circle.setRadius(newValue.doubleValue()/2);
+            circle.setCenterY(newValue.doubleValue()/2);
+            circle.setCenterX(newValue.doubleValue()/2);
+        });
     }
 
     @Override
@@ -74,17 +83,14 @@ public class MInventoryPreviewView extends HBox implements ViewTemplate{
 
     @Override
     public void addEvents() {
-
     }
 
     @Override
     public void applyStylesheet() {
-
         this.setId("PreviewView");
     }
 
     @Override
     public void applySpecialStyles() {
-
     }
 }

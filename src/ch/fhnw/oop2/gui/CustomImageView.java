@@ -53,7 +53,7 @@ public class CustomImageView extends ImageView implements ViewTemplate {
     @Override
     public void initializeLayout() {
         this.setPreserveRatio(true);
-        this.setStyle("-fx-background-color: #adbfff");
+        this.setStyle("-fx-background-color: whitesmoke");
     }
 
     @Override
@@ -101,13 +101,16 @@ public class CustomImageView extends ImageView implements ViewTemplate {
     }
 
     public void connectToModel() {
-        this.imageProperty().bind(dataModel.getProxy().getImageProperty());
+        dataModel.getProxy().getImageProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) this.imageProperty().setValue(newValue);
+            else this.imageProperty().setValue(
+                    new CustomImage("/resources/images/NoImage.png", "/resources/images/NoImage.png"));
+        });
     }
 
     void addImage(CustomImage ci){
 
-        dataModel.copyImage(ci);
-        dataModel.getProxy().getImageProperty().setValue(ci);
+        dataModel.addImage(ci);
     }
 
     private void mouseDragDropped(final DragEvent e) {

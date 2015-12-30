@@ -3,12 +3,13 @@ package ch.fhnw.oop2.model;
 import ch.fhnw.oop2.control.MInventoryController;
 import ch.fhnw.oop2.gui.CustomImage;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 import java.security.InvalidParameterException;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,13 +22,16 @@ public class MInventoryDataModel {
 
     private final IntegerProperty currentSelectedId = new SimpleIntegerProperty(-1);
 
-    private final MInventoryObjectProxy proxy = new MInventoryObjectProxy('o', -1, null, null, null);
+    private final MInventoryObjectProxy proxy = MInventoryObjectProxy.emptyObjectProxy();
     private MInventoryObject temporaryObject;
+
+    private final Map<Integer, Image> imagesToSave = new HashMap<>();
 
     public final String ITEM_IDENTIFER = "i";
     public final String STORAGE_IDENTIFIER = "s";
 
     private SimpleListProperty<MInventoryObject> mInventoryObjectList;
+    private SimpleListProperty<MInventoryObject> mInventoryObjectListProxy;
 
 
     // --- API ---
@@ -71,14 +75,47 @@ public class MInventoryDataModel {
         select(newID);
     }
 
-    public void cancelNewObject() {
-        unselect(0);
-        select(currentSelectedId.get());
+    // -- filter and search --
+    public void noFilter() {
+        mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
+                .map(object -> getById(object.getId()))
+                .collect(Collectors.toList())));
+    }
+    public void filterByStorage() {
+        mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
+                .filter(mInventoryObject -> (mInventoryObject instanceof MInventoryStorage))
+                .map(object -> getById(object.getId()))
+                .collect(Collectors.toList())));
+    }
+    public void filterByItem() {
+        mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
+                .filter(mInventoryObject -> (mInventoryObject instanceof MInventoryItem))
+                .map(object -> getById(object.getId()))
+                .collect(Collectors.toList())));
+    }
+    public void searchFor(String search) {
+        search.trim();
+        search.toLowerCase();
+        if (search.isEmpty()) {
+            noFilter();
+        } if (search.length() < 2) {
+            try {
+                int id = Integer.parseInt(search);
+                mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectListProxy.stream()
+                        .filter(object -> (object.getId() == id))
+                        .map(object -> getById(object.getId()))
+                        .collect(Collectors.toList())));
+            } catch (NumberFormatException nfe) {
+                System.out.println(nfe.getMessage() + nfe.getStackTrace().toString());
+            }
+        } else {
+            mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectListProxy.stream()
+                    .filter(object -> (infoAsLine(object.getId()).toLowerCase().contains(search)))
+                    .map(object -> getById(object.getId()))
+                    .collect(Collectors.toList())));
+        }
     }
 
-    public void delete() {
-        this.getMInventoryObjectSimpleListProperty().remove(getById(currentSelectedId.get()));
-    }
 
     // -- selection handling --
     public void updateSelection(int newSelectedId){
@@ -88,7 +125,6 @@ public class MInventoryDataModel {
         this.unselect(oldID);
         this.select(newID);
     }
-
     public void unselect(int oldID) {
         MInventoryObject oldObject = getById(oldID);
         if (oldObject != null) {
@@ -96,8 +132,7 @@ public class MInventoryDataModel {
             proxy.getDescriptionProperty().unbindBidirectional(oldObject.getDescriptionProperty());
             proxy.getImageProperty().unbindBidirectional(oldObject.getImageProperty());
             proxy.setId(-1);
-            //if(oldID < 1) this.currentSelectedId.setValue(-1);
-            proxy.setId('o');
+            proxy.setIdentifier(' ');
         }
         if (oldID < 1) {
             temporaryObject = null;
@@ -110,13 +145,34 @@ public class MInventoryDataModel {
             proxy.getDescriptionProperty().bindBidirectional(newObject.getDescriptionProperty());
             proxy.getImageProperty().bindBidirectional(newObject.getImageProperty());
             proxy.setId(newObject.getId());
-            if(newID > 0 )this.currentSelectedId.setValue(newObject.getId());
-            proxy.setId('o');
+            if(newID > 0 ) this.currentSelectedId.setValue(newObject.getId());
+            if (newObject instanceof MInventoryStorage) proxy.setIdentifier('s');
+            if (newObject instanceof MInventoryItem) proxy.setIdentifier('i');
         }
     }
 
+
+    // -- data operations --
     public void save() {
         this.controller.writeObjectsToFile();
+
+        for (Map.Entry entry : imagesToSave.entrySet()) {
+            copyImage((CustomImage) entry.getValue());
+            imagesToSave.remove(entry.getKey());
+        }
+    }
+    public void delete() {
+        this.getMInventoryObjectSimpleListProperty().remove(getById(currentSelectedId.get()));
+    }
+
+    public void addImage(CustomImage ci) {
+        imagesToSave.put(currentSelectedId.get(), ci);
+        proxy.getImageProperty().setValue(ci);
+    }
+
+    public void cancelNewObject() {
+        unselect(0);
+        select(currentSelectedId.get());
     }
 
     public String infoAsLine(int objectId){
@@ -183,11 +239,23 @@ public class MInventoryDataModel {
     public SimpleListProperty<MInventoryObject> getMInventoryObjectSimpleListProperty() {
         return this.mInventoryObjectList;
     }
+    public SimpleListProperty<MInventoryObject> getMInventoryObjectProxySimpleListProperty() {
+        return this.mInventoryObjectListProxy;
+    }
 
 
     // --- SETTER ---
     public void setMInventoryObjectListProperty(SimpleListProperty<MInventoryObject> mInventoryObjectSimpleListProperty) {
         if (mInventoryObjectList == null) this.mInventoryObjectList = mInventoryObjectSimpleListProperty;
+    }
+
+    public void setMInventoryObjectListProxyProperty(SimpleListProperty<MInventoryObject> mInventoryObjectProxySimpleListProperty) {
+        if (mInventoryObjectListProxy == null) {
+            this.mInventoryObjectListProxy = new SimpleListProperty<>();
+            mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectProxySimpleListProperty.stream()
+                    .map(object -> getById(object.getId()))
+                    .collect(Collectors.toList())));
+        }
     }
 
     public void setDataMode(SimpleListProperty<MInventoryObject> mInventoryObjectList) {

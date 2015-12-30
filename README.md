@@ -3,17 +3,26 @@ A sort-your-stuff application
 
 ## Notice
 
-In order to run the app you have to create these folders in your home directory
-MInventory/
-MInventory/images/
+The app starts with no data at all when you first start it.
+You can add new items and storages and add pictures to them.
+Also bew aware that the application does support multiple users meaning every user can have different contents.
 
 ## Versions
 
+### MInventory_0.5
+
+#### Changes
+1. Added filter and search feature
+2. Refactoring
+3. Bug fixes
+4. Implemented all attribute variables in MInventoryObject
+
 ### MInventory_0.4
+
+#### Changes
 1. Added drag and drop support to add images from types .jpg .png
 2. Refactoring of code
 3. Bug fix
-
 
 ### MInventory_0.3
 

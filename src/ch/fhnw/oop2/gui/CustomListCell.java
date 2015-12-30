@@ -40,30 +40,29 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
     protected void updateItem(MInventoryObject mInventoryObject, boolean empty)	{
 
         if (super.getItem() != null && nameChangeListener != null) {
-            super.getItem().getNameProperty().removeListener(nameChangeListener);
+            getItem().getNameProperty().removeListener(nameChangeListener);
             getItem().getImageProperty().removeListener(imageChangeListener);
         }
 
         super.updateItem(mInventoryObject, empty);
         super.setGraphic(new Circle(10, 10, 20, Color.WHITESMOKE));
-
         super.setText(null);
 
         if (super.getItem() != null) {
             nameChangeListener = (observable, oldValue, newValue) -> {
-                super.setText(newValue); };
+                setText(newValue); };
             imageChangeListener = (observable, oldValue, newValue) -> {
                 updateGraphic(); };
             updateGraphic();
-            super.textProperty().setValue( getItem().getName());
-            super.getItem().getNameProperty().addListener(nameChangeListener);
-            super.getItem().getImageProperty().addListener(imageChangeListener);
+            setText(getItem().getName());
+            getItem().getNameProperty().addListener(nameChangeListener);
+            getItem().getImageProperty().addListener(imageChangeListener);
         }
     }
 
     private void addEvents() {
-        this.setOnMouseClicked( (MouseEvent event) -> {
-            if (this.getItem() != null) dataModel.updateSelection(this.getItem().getId()); });
+        /*this.setOnMouseClicked( (MouseEvent event) -> {
+            if (this.getItem() != null) dataModel.updateSelection(this.getItem().getId()); });*/
         this.setOnDragDropped( event -> {
             if (super.getItem() instanceof MInventoryStorage &&(MInventoryObject)event.getAcceptingObject() != null) {
                 try {
@@ -88,6 +87,19 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
             ImageView cImageView = new CustomImageView(presModel, dataModel);
             ImageViewPane imageViewPane;
                 cImageView.setImage(getItem().getImage());
+                cImageView.setPreserveRatio(false);
+                cImageView.setFitHeight(42);
+                cImageView.setFitWidth(42);
+            imageViewPane = new ImageViewPane(cImageView);
+                imageViewPane.setMaxHeight(42);
+                imageViewPane.setPrefSize(42, 42);
+                imageViewPane.setMaxWidth(42);
+                cImageView.setClip(new Circle(cImageView.getFitHeight() / 2 - 1, cImageView.getFitWidth() / 2 - 1, 20));
+            super.setGraphic(imageViewPane);
+        } else {
+            ImageView cImageView = new CustomImageView(presModel, dataModel);
+            ImageViewPane imageViewPane;
+                setStyle("-fx-background-color: whitesmoke;");
                 cImageView.setPreserveRatio(false);
                 cImageView.setFitHeight(42);
                 cImageView.setFitWidth(42);

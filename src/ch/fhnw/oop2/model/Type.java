@@ -1,5 +1,8 @@
 package ch.fhnw.oop2.model;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 import java.security.InvalidParameterException;
 
 /**
@@ -7,36 +10,47 @@ import java.security.InvalidParameterException;
  */
 public class Type {
 
-    /** Type of the entity. */
-    private String type;
-    /** For what the entity is used. */
-    private String usageType;
-    /** Is a storage? Otherwise it's an item. */
-    private boolean isStorage;
+    /** Type of the object. */
+    private StringProperty type = new SimpleStringProperty();
+    /** For what the object is used. */
+    private StringProperty usageType = new SimpleStringProperty();
 
-    // --- GETTTER ---
-    /** Check if object is a storage. */
-    public boolean getIsStorage() { return this.isStorage; }
+    public Type () {
+
+    }
+    public Type(String type, String usageType) {
+        this.type.setValue(type);
+        this.usageType.setValue(usageType);
+    }
+
+
+    // --- GETTER ---
     /** Get definition on how the object is used or what it is used for. */
     public String getUsageType() { return new String(this.usageType.toString()); }
     /** Get the general type identifier of the object. */
     public String getType() { return new String(this.type.toString()); }
 
+
+    // --- GETTER PROPERTY ---
+    /** Get definition on how the object is used or what it is used for. */
+    public StringProperty getUsageTypeProperty() { return usageType; }
+    /** Get the general type identifier of the object. */
+    public StringProperty getTypeProperty() { return type; }
+
+
     // --- SETTER ---
-    /** @param isStorage True if the object is a storage */
-    protected void setIsStorage(boolean isStorage) { this.isStorage = isStorage; }
     /** @param usageType How the object is used or what it is used for. */
     public void setUsageType(String usageType) {
         if (usageType == null) {
             throw new NullPointerException("Usage type cannot be set to null.");
         }
-        this.usageType = usageType;
+        this.usageType.setValue(usageType);
     }
     /** @param type A general type identifier of the object. */
     public void setType(String type) {
         if (type == null) {
             throw new NullPointerException("Type cannot be set to null.");
         }
-        this.type = type;
+        this.type.setValue(type);
     }
 }

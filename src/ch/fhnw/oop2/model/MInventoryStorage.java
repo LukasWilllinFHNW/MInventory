@@ -4,6 +4,7 @@ import ch.fhnw.oop2.gui.CustomImage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 import java.security.InvalidParameterException;
 import java.util.Collection;
@@ -28,8 +29,11 @@ public class MInventoryStorage extends MInventoryObject {
      * @param name name of the storage
      * @param description description of the storage
      * @param image or symbol to use. */
-    public MInventoryStorage(int id, String name, String description, CustomImage image) { //, String description, int symbolId) {
-        super(id, name, description, image);
+    public MInventoryStorage(int id, String name, String description, CustomImage image, double weight,
+                             Color color, double[] dimensions,
+                             double stateOfDecay, Type type, String distinctAttribute) {
+
+        super(id, name, description, image, weight, color, dimensions, stateOfDecay, type, distinctAttribute);
         this.objectIds = FXCollections.observableArrayList();
     }
 
@@ -39,7 +43,9 @@ public class MInventoryStorage extends MInventoryObject {
     }
 
     public static MInventoryObject emptyObject() {
-        return new MInventoryStorage(-1, "", "", null);
+        double[] dims = {0, 0, 0};
+        Type type = new Type("", "");
+        return new MInventoryStorage(-1, "", "", null, 0, Color.WHITESMOKE, dims, 0, type, "");
     }
 
 

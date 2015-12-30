@@ -1,13 +1,11 @@
 package ch.fhnw.oop2.control;
 
 import ch.fhnw.oop2.gui.CustomImage;
-import ch.fhnw.oop2.model.MInventoryDataModel;
-import ch.fhnw.oop2.model.MInventoryItem;
-import ch.fhnw.oop2.model.MInventoryObject;
-import ch.fhnw.oop2.model.MInventoryStorage;
+import ch.fhnw.oop2.model.*;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.paint.Color;
 
 //com.sun.org.apache.xpath.internal.operations.String TODO: Whot iis thiis?
 import java.io.BufferedWriter;
@@ -100,12 +98,13 @@ public class MInventoryController {
         } catch (IOException e) {
             throw new IllegalStateException("save failed");
         }
+
     }
 
     public void copyImage(CustomImage i, String newFileName) {
         List<String> list = (List<String>) pathAsList.clone();
             list.add(IMAGE_FOLDER_NAME);
-        String target = composePath(pathAsList, newFileName);
+        String target = composePath(list, newFileName);
         CopyOption[] options = new CopyOption[]{
                 StandardCopyOption.REPLACE_EXISTING,
                 StandardCopyOption.COPY_ATTRIBUTES
@@ -228,15 +227,19 @@ public class MInventoryController {
                     throw new InvalidPathException("Image not found", "" + id + "-1.jpg" + " in " + composePath(list, null));
             } catch (InvalidPathException ipe) {
                 System.out.println(ipe.getMessage() + "\n" + ipe.getStackTrace());
-                //image = new CustomImage(Paths.get("/resources/images/NoImage.png").toUri().toString(), "/resources/images/NoImage.png");
-                image = new CustomImage("/resources/images/NoImage.png", "/resources/images/NoImage.png");
+                image = null;
             }
 
+        // Dummy data
+        double[] dims = {0, 0, 0};
+        Type type = new Type("", "");
+
         if(arguments[csv.IDENTIFIER].equals(dataModel.STORAGE_IDENTIFIER)) {
-            return new MInventoryStorage(id, name, description, image); // TODO: Image
+            return new MInventoryStorage(id, name, description, image , 0, Color.WHITESMOKE, dims, 0, type, "");
         } else {
             //TODO: Add item to storage if storageId exists
-            return new MInventoryItem(id, name, description, image); // TODO image
+
+            return new MInventoryItem(id, name, description, image, 0, Color.WHITESMOKE, dims, 0, type, "");
         }
     }
 }

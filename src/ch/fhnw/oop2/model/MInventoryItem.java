@@ -2,6 +2,7 @@ package ch.fhnw.oop2.model;
 
 import ch.fhnw.oop2.gui.CustomImage;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 /**
  * Created by Lukas W on 17.11.2015.
@@ -17,9 +18,11 @@ public class MInventoryItem extends MInventoryObject {
      * @param description Description of item
      * @param image or symbol to use along with the item
      */
-    public MInventoryItem(int id, String name, String description, CustomImage image) {
+    public MInventoryItem(int id, String name, String description, CustomImage image, double weight,
+                          Color color, double[] dimensions,
+                          double stateOfDecay, Type type, String distinctAttribute) {
 
-        super(id, name, description, image); //description, symbolId, false);
+        super(id, name, description, image, weight, color, dimensions, stateOfDecay, type, distinctAttribute);
     }
 
     public MInventoryItem(int id, MInventoryObject object) {
@@ -27,7 +30,8 @@ public class MInventoryItem extends MInventoryObject {
     }
 
     public static MInventoryObject emptyObject() {
-
-        return new MInventoryItem(-1, "", "", null);
+        double[] dims = {0, 0, 0};
+        Type type = new Type("", "");
+        return new MInventoryItem(-1, "", "", null, 0, Color.WHITESMOKE, dims, 0, type, "");
     }
 }

@@ -51,7 +51,7 @@ public class MInventoryListView extends ListView implements ViewTemplate{
 
     @Override
     public void addBindings(){
-        this.itemsProperty().bind(dataModel.getMInventoryObjectSimpleListProperty());
+        this.itemsProperty().bind(dataModel.getMInventoryObjectProxySimpleListProperty());
         this.disableProperty().bind(presModel.getAddDisabledProperty());
     }
 

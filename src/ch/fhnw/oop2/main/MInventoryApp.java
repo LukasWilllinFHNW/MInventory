@@ -27,8 +27,8 @@ public class MInventoryApp extends Application{
     private MInventoryController mInventoryController;
     private MInventoryCmd mInventoryCmd;
 
-    private int startHeight = 800;
-    private int startWidth = 1000;
+    private int startHeight = 500;
+    private int startWidth = 600;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -37,6 +37,7 @@ public class MInventoryApp extends Application{
         presModel = new MInventoryPresentationModel();
         mInventoryController = new MInventoryController(dataModel);
         dataModel.setMInventoryObjectListProperty(mInventoryController.readObjectsFromFile());
+        dataModel.setMInventoryObjectListProxyProperty(mInventoryController.readObjectsFromFile());
         dataModel.setMInventoryController(mInventoryController);
 
         // -- setup the main UI --
@@ -54,8 +55,8 @@ public class MInventoryApp extends Application{
         primaryStage.setScene(scene);
         primaryStage.setHeight(startHeight);
         primaryStage.setWidth(startWidth);
-        primaryStage.setMinHeight(startHeight-300);
-        primaryStage.setMinWidth(startWidth-400);
+        primaryStage.setMinHeight(startHeight-200);
+        primaryStage.setMinWidth(startWidth-300);
 
         primaryStage.xProperty().addListener((observable, oldValue, newValue) -> {
             presModel.setX(newValue.doubleValue());

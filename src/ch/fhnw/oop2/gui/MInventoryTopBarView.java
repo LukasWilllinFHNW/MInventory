@@ -3,6 +3,7 @@ package ch.fhnw.oop2.gui;
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
@@ -84,14 +85,14 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
 
         presModel.doBlur();
 
-        overlay = new Overlay(presModel, dataModel, presModel.getHeightProperty().get()-400, presModel.getWidthProperty().get()-400);
+        overlay = new Overlay(presModel, dataModel, 160, 250);
 
         this.askIfItem = new Button();
             askIfItem.setText("an item");
-            askIfItem.setPadding(new Insets(6, 6, 3, 6));
+            //askIfItem.setPadding(new Insets(6, 6, 3, 6));
         this.askIfStorage = new Button();
             askIfStorage.setText("a storage");
-            askIfStorage.setPadding(new Insets(3, 6, 6, 6));
+            //askIfStorage.setPadding(new Insets(3, 6, 6, 6));
 
         this.askIfItem.setOnMouseClicked(event -> {
             dataModel.addNewObject('i');
@@ -104,6 +105,7 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
 
         HBox box = new HBox();
             box.getChildren().addAll(askIfItem, askIfStorage);
+            box.setPadding(new Insets(5));
 
         overlay.addNode(box);
     }
@@ -130,6 +132,7 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
 
         HBox box = new HBox();
             box.getChildren().addAll(createButton, cancelButton);
+            box.setAlignment(Pos.CENTER);
 
         overlay = new Overlay(presModel, dataModel, 600, 600);
         presModel.enterAddingMode();

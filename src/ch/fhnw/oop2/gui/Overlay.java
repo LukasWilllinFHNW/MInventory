@@ -41,13 +41,14 @@ public class Overlay extends Stage implements ViewTemplate {
         super.setHeight(height);
         super.setWidth(width);
 
-        super.setX(presModel.getX() + (presModel.getWidthProperty().get()/2) - (super.getWidth()/2) );
-        super.setY(presModel.getY() + (presModel.getHeightProperty().get()/2) - (super.getHeight()/2) );
+        //super.setX(presModel.getX() + (presModel.getWidthProperty().get()/2) - (super.getWidth()/2) );
+        //super.setY(presModel.getY() + (presModel.getHeightProperty().get()/2) - (super.getHeight()/2) );
 
         this.initStyle(StageStyle.TRANSPARENT);
 
         HBox box = new HBox();
             box.getChildren().add(backButton);
+            box.setPadding(new Insets(5));
         addNode(box);
 
         this.open();
@@ -79,12 +80,12 @@ public class Overlay extends Stage implements ViewTemplate {
     public void initializeLayout() {
 
         container = new VBox();
-            container.setFillWidth(true);
-            container.autosize();
+            //container.setFillWidth(true);
+            //container.autosize();
 
         stackPane = new StackPane(container);
             stackPane.setAlignment(Pos.TOP_CENTER);
-            stackPane.autosize();
+            //stackPane.autosize();
     }
 
     @Override
@@ -104,10 +105,6 @@ public class Overlay extends Stage implements ViewTemplate {
 
     @Override
     public void addEvents() {
-        this.container.setOnMouseClicked(event -> {
-            presModel.enterEditMode();
-            close();
-        });
         backButton.setOnMouseClicked(event -> {
             presModel.enterEditMode();
             close();
@@ -116,6 +113,7 @@ public class Overlay extends Stage implements ViewTemplate {
 
     @Override
     public void applyStylesheet() {
+
         scene.getStylesheets()
             .add(getClass()
                 .getResource("appStylesheet.css")
@@ -127,7 +125,6 @@ public class Overlay extends Stage implements ViewTemplate {
 
     @Override
     public void applySpecialStyles() {
-
         presModel.doBlur();
     }
 

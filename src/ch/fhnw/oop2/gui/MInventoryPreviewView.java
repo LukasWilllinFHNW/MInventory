@@ -39,6 +39,11 @@ public class MInventoryPreviewView extends VBox implements ViewTemplate{
         initSequence();
     }
 
+
+    // --- API ---
+
+
+    // -- init sequence --
     @Override
     public void initializeControls() {
 
@@ -75,6 +80,9 @@ public class MInventoryPreviewView extends VBox implements ViewTemplate{
             circle.setCenterY(newValue.doubleValue()/2);
             circle.setCenterX(newValue.doubleValue()/2);
         });
+        circle.radiusProperty().addListener((observable, oldValue, newValue) -> {
+            cImageView.setFitWidth(newValue.doubleValue()*2);
+            imageViewPane.setMaxWidth(newValue.doubleValue()*2);});
     }
 
     @Override

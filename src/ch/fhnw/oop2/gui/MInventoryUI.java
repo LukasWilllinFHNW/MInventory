@@ -83,6 +83,7 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
         mInventoryPreviewView = new MInventoryPreviewView(presModel, dataModel);
         splitPane = new SplitPane();
         gridPane = new GridPane();
+            gridPane.setMinWidth(400);
             rcPreview = new RowConstraints();
                 rcPreview.setPercentHeight(35);
                 rcPreview.setVgrow(Priority.ALWAYS);
@@ -95,6 +96,7 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
             gridPane.getRowConstraints().addAll(rcPreview, rcDetail);
             gridPane.getColumnConstraints().add(cc);
         vBoxList = new VBoxList(presModel, dataModel);
+            vBoxList.setMinWidth(240);
         mInventoryDetailedView = new MInventoryDetailedView(presModel, dataModel);
     }
 
@@ -107,6 +109,8 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
         mainPane.setTop(mInventoryTopBarView);
         mainPane.setCenter(splitPane);
 
+        splitPane.setDividerPosition(0, 400);
+
         this.getChildren().add(mainPane);
     }
 
@@ -115,7 +119,8 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
     }
 
     public void addListeners(){
-
+        splitPane.heightProperty().addListener((observable, oldValue, newValue) -> {
+            vBoxList.setPrefHeight(newValue.doubleValue()); });
     }
 
     @Override
@@ -150,6 +155,8 @@ class VBoxList extends VBox implements ViewTemplate{
     private HBox hBoxListSearch;
     private MInventoryListView mInventoryListView;
 
+    private Pane pr;
+
     Button filterByStorage;
     Button filterByItem;
     Button noFilter;
@@ -180,14 +187,16 @@ class VBoxList extends VBox implements ViewTemplate{
         hBoxListSearch = new HBox();
             hBoxListSearch.setAlignment(Pos.CENTER_LEFT);
             hBoxListSearch.setPrefHeight(20);
-
+        pr = new Pane();
         mInventoryListView = new MInventoryListView(presModel, dataModel);
 
     }
 
     @Override
     public void layoutPanes() {
-        this.getChildren().addAll(hBoxListOptions, hBoxListSearch, mInventoryListView);
+        pr.getChildren().add(mInventoryListView);
+        pr.setPrefWidth(300);
+        this.getChildren().addAll(hBoxListOptions, hBoxListSearch, pr);
     }
 
     @Override
@@ -201,6 +210,13 @@ class VBoxList extends VBox implements ViewTemplate{
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.trim().isEmpty()) dataModel.searchFor(newValue);
             else dataModel.noFilter();});
+
+        pr.heightProperty().addListener((observable, oldValue, newValue) -> {
+            mInventoryListView.setPrefHeight(newValue.doubleValue()); });
+        pr.widthProperty().addListener((observable, oldValue, newValue) -> {
+            mInventoryListView.setPrefWidth(newValue.doubleValue()); });
+        this.heightProperty().addListener((observable, oldValue, newValue) -> {
+            pr.setPrefHeight(newValue.doubleValue()); });
     }
 
     @Override

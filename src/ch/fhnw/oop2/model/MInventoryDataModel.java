@@ -67,9 +67,11 @@ public class MInventoryDataModel {
         };
         if (proxy.getIdentifier() == 'i' && temporaryObject != null) {
             mInventoryObjectList.add(new MInventoryItem(newID, temporaryObject));
+            filterByItem();
         }
         if (proxy.getIdentifier() == 's' && temporaryObject != null) {
             mInventoryObjectList.add(new MInventoryStorage(newID, temporaryObject));
+            filterByStorage();
         }
         unselect(currentSelectedId.get());
         select(newID);
@@ -154,15 +156,22 @@ public class MInventoryDataModel {
 
     // -- data operations --
     public void save() {
+        // Write csv
         this.controller.writeObjectsToFile();
-
+        // copy images the user has previously choosen to a dedicated location
+        List<Integer> ids = new ArrayList<>();
         for (Map.Entry entry : imagesToSave.entrySet()) {
-            copyImage((CustomImage) entry.getValue());
-            imagesToSave.remove(entry.getKey());
+            this.copyImage((int)entry.getKey(), (CustomImage) entry.getValue());
+            ids.add((int)entry.getKey());
+        }
+        for (int id : ids) {
+            imagesToSave.remove(id);
         }
     }
     public void delete() {
-        this.getMInventoryObjectSimpleListProperty().remove(getById(currentSelectedId.get()));
+        // pay attention to the order first remove from proxy
+        mInventoryObjectListProxy.remove(getById(currentSelectedId.get()));
+        mInventoryObjectList.remove(getById(currentSelectedId.get()));
     }
 
     public void addImage(CustomImage ci) {
@@ -208,9 +217,9 @@ public class MInventoryDataModel {
         return info.toString();
     }
 
-    public void copyImage(CustomImage ci) {
+    public void copyImage(int id,CustomImage ci) {
         String fileExtension = ci.getUrl().substring(ci.getUrl().lastIndexOf('.'));
-        String newFileName = currentSelectedId.get() + "-1" + fileExtension;
+        String newFileName = id + "-1" + fileExtension;
         controller.copyImage(ci, newFileName);
     }
 

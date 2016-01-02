@@ -53,8 +53,9 @@ public class MInventoryPreviewView extends VBox implements ViewTemplate{
     public void initializeLayout() {
         circle = new Circle();
         root = new StackPane();
+            root.setAlignment(Pos.TOP_CENTER);
         cImageView = new CustomImageView(presModel, dataModel);
-            cImageView.setClip(circle);
+            //cImageView.setClip(circle); // Buggy: do not use
             ((CustomImageView) cImageView).connectToModel();
         imageViewPane = new ImageViewPane(cImageView);
             circle.setRadius(imageViewPane.getHeight()/2);
@@ -67,6 +68,7 @@ public class MInventoryPreviewView extends VBox implements ViewTemplate{
         root.getChildren().add(imageViewPane);
         this.getChildren().add(root);
         this.setVgrow(root, Priority.ALWAYS);
+        this.setAlignment(Pos.TOP_CENTER);
     }
 
     @Override
@@ -75,14 +77,7 @@ public class MInventoryPreviewView extends VBox implements ViewTemplate{
 
     @Override
     public void addListeners() {
-        imageViewPane.heightProperty().addListener((observable, oldValue, newValue) -> {
-            circle.setRadius(newValue.doubleValue()/2);
-            circle.setCenterY(newValue.doubleValue()/2);
-            circle.setCenterX(newValue.doubleValue()/2);
-        });
-        circle.radiusProperty().addListener((observable, oldValue, newValue) -> {
-            cImageView.setFitWidth(newValue.doubleValue()*2);
-            imageViewPane.setMaxWidth(newValue.doubleValue()*2);});
+
     }
 
     @Override

@@ -31,7 +31,7 @@ public class MInventoryDataModel {
     public final String STORAGE_IDENTIFIER = "s";
 
     private SimpleListProperty<MInventoryObject> mInventoryObjectList;
-    private SimpleListProperty<MInventoryObject> mInventoryObjectListProxy;
+    private SimpleListProperty<MInventoryObject> mInventoryObjectListProxy = new SimpleListProperty<>();
 
 
     // --- API ---
@@ -82,42 +82,68 @@ public class MInventoryDataModel {
         mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
+        exceptionSafeSelectFirst();
     }
     public void filterByStorage() {
         mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
                 .filter(mInventoryObject -> (mInventoryObject instanceof MInventoryStorage))
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
+        exceptionSafeSelectFirst();
     }
     public void filterByItem() {
         mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
                 .filter(mInventoryObject -> (mInventoryObject instanceof MInventoryItem))
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
+        exceptionSafeSelectFirst();
     }
-    public void searchFor(String search) {
-        search.trim();
-        search.toLowerCase();
-        if (search.isEmpty()) {
-            noFilter();
-        } if (search.length() < 2) {
-            try {
-                int id = Integer.parseInt(search);
+    public ListProperty<MInventoryObject> searchFor(String oldSearch, String newSearch) {
+        if (newSearch.length() > oldSearch.length()) { //faster search in proxy list -> shrinking object amount
+            newSearch.trim();
+            newSearch.toLowerCase();
+            if (newSearch.length() < 2) {
+                try {
+                    int id = Integer.parseInt(newSearch);
+                    mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectListProxy.stream()
+                            .filter(object -> (object.getId() == id))
+                            .map(object -> getById(object.getId()))
+                            .collect(Collectors.toList())));
+                } catch (NumberFormatException nfe) {
+                    System.out.println(nfe.getMessage() + nfe.getStackTrace().toString());
+                }
+            } else {
                 mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectListProxy.stream()
-                        .filter(object -> (object.getId() == id))
+                        .filter(object -> (infoAsLine(object.getId()).toLowerCase().contains(newSearch)))
                         .map(object -> getById(object.getId()))
                         .collect(Collectors.toList())));
-            } catch (NumberFormatException nfe) {
-                System.out.println(nfe.getMessage() + nfe.getStackTrace().toString());
             }
-        } else {
-            mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectListProxy.stream()
-                    .filter(object -> (infoAsLine(object.getId()).toLowerCase().contains(search)))
-                    .map(object -> getById(object.getId()))
-                    .collect(Collectors.toList())));
+        } else { // Slower search in object list if new search string is shorter -> growing object amount
+            newSearch.trim();
+            newSearch.toLowerCase();
+            if (newSearch.isEmpty()) {
+                noFilter();
+            }
+            if (newSearch.length() < 2) {
+                try {
+                    int id = Integer.parseInt(newSearch);
+                    mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
+                            .filter(object -> (object.getId() == id))
+                            .map(object -> getById(object.getId()))
+                            .collect(Collectors.toList())));
+                } catch (NumberFormatException nfe) {
+                    System.out.println(nfe.getMessage() + nfe.getStackTrace().toString());
+                }
+            } else {
+                mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
+                        .filter(object -> (infoAsLine(object.getId()).toLowerCase().contains(newSearch)))
+                        .map(object -> getById(object.getId()))
+                        .collect(Collectors.toList())));
+            }
         }
+        exceptionSafeSelectFirst();
+        return mInventoryObjectListProxy;
     }
-
 
     // -- selection handling --
     public void updateSelection(int newSelectedId){
@@ -126,6 +152,17 @@ public class MInventoryDataModel {
         // DO unbinding
         this.unselect(oldID);
         this.select(newID);
+    }
+
+    /**
+     * Selects the first object in object list proxy catching all expected exceptions
+     */
+    private void exceptionSafeSelectFirst(){
+        try {
+            updateSelection(mInventoryObjectListProxy.get(0).getId());
+        } catch (IndexOutOfBoundsException iobe) {
+            System.out.println(iobe.getMessage() + iobe.getStackTrace().toString() + "No object in list");
+        }
     }
     public void unselect(int oldID) {
         MInventoryObject oldObject = getById(oldID);

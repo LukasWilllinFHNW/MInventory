@@ -102,10 +102,18 @@ public class CustomImageView extends ImageView implements ViewTemplate {
 
     public void connectToModel() {
         dataModel.getProxy().getImageProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) this.imageProperty().setValue(newValue);
-            else this.imageProperty().setValue(
-                    new CustomImage("/resources/images/NoImage.png", "/resources/images/NoImage.png"));
+            if (newValue != null) {
+                this.imageProperty().setValue(newValue);
+            }
+            else {
+                this.imageProperty().setValue(
+                        new CustomImage("/resources/images/NoImage.png", "/resources/images/NoImage.png"));
+            }
         });
+        if (dataModel.getProxy().getImage() == null) {
+            this.imageProperty().setValue(
+                    new CustomImage("/resources/images/NoImage.png", "/resources/images/NoImage.png"));
+        }
     }
 
     void addImage(CustomImage ci){

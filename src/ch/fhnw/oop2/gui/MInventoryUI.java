@@ -8,16 +8,16 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.effect.BoxBlur;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.io.File;
 // TODO: Add button symbols
 // TODO: Add tile alternative for listView
 // TODO: Make basic layout
@@ -172,9 +172,9 @@ class VBoxList extends VBox implements ViewTemplate{
 
     @Override
     public void initializeControls() {
-        filterByStorage = new Button("storages");
-        filterByItem = new Button("items");
-        noFilter = new Button("everything");
+        filterByStorage = presModel.createButton("storages");
+        filterByItem = presModel.createButton("items");
+        noFilter = presModel.createButton("everything");
 
         txtSearch = new TextField("");
     }
@@ -182,11 +182,15 @@ class VBoxList extends VBox implements ViewTemplate{
     @Override
     public void initializeLayout() {
         hBoxListOptions = new HBox();
-            hBoxListOptions.setAlignment(Pos.CENTER_LEFT);
-            hBoxListOptions.setPrefHeight(20);
+            hBoxListOptions.setAlignment(Pos.CENTER);
+            hBoxListOptions.setMaxHeight(30);
+            hBoxListOptions.setPadding(new Insets(5));
+            hBoxListOptions.setSpacing(5);
         hBoxListSearch = new HBox();
-            hBoxListSearch.setAlignment(Pos.CENTER_LEFT);
-            hBoxListSearch.setPrefHeight(20);
+            hBoxListSearch.setAlignment(Pos.CENTER);
+            hBoxListSearch.setMaxHeight(30);
+            hBoxListSearch.setPadding(new Insets(5));
+            hBoxListSearch.setSpacing(5);
         pr = new Pane();
         mInventoryListView = new MInventoryListView(presModel, dataModel);
 
@@ -208,7 +212,7 @@ class VBoxList extends VBox implements ViewTemplate{
     @Override
     public void addListeners() {
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.trim().isEmpty()) dataModel.searchFor(newValue);
+            if (!newValue.trim().isEmpty()) dataModel.searchFor(oldValue, newValue);
             else dataModel.noFilter();});
 
         pr.heightProperty().addListener((observable, oldValue, newValue) -> {
@@ -224,8 +228,22 @@ class VBoxList extends VBox implements ViewTemplate{
         noFilter.setOnMouseClicked(event -> {
             dataModel.noFilter(); });
         filterByStorage.setOnMouseClicked(event -> {
-            dataModel.filterByStorage(); });
+            dataModel.filterByStorage();
+            filterByStorage.setGraphic(new ImageView(new CustomImage(
+                    new File(presModel.getIcon("link70.png")).toURI().toString(),
+                    presModel.getIcon("link70.png"))));
+            filterByStorage.setContentDisplay(ContentDisplay.LEFT);
+            noFilter.setGraphic(null);
+            filterByItem.setGraphic(null);
+        });
         filterByItem.setOnMouseClicked(event -> {
-            dataModel.filterByItem(); });
+            dataModel.filterByItem();
+            filterByItem.setGraphic(new ImageView(new CustomImage(
+                    new File(presModel.getIcon("link70.png")).toURI().toString(),
+                    presModel.getIcon("link70.png"))));
+            filterByStorage.setContentDisplay(ContentDisplay.LEFT);
+            filterByStorage.setGraphic(null);
+            noFilter.setGraphic(null);
+        });
     }
 }

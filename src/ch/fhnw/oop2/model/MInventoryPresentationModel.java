@@ -6,6 +6,9 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
+
+import java.io.File;
 
 /**
  * Created by Lukas W on 03.11.2015.
@@ -36,6 +39,24 @@ public class MInventoryPresentationModel {
      */
     public MInventoryPresentationModel() {
         this.objectList = FXCollections.observableArrayList();
+    }
+
+
+    // --- API ---
+    public Button createButton(String text) {
+        Button button = new Button(text);
+        button.setId("styledButton");
+        return button;
+    }
+
+    public String getIcon(String name) {
+        StringBuffer path = new StringBuffer();
+        path.append(File.separatorChar + "src"
+                + File.separatorChar + "resources"
+                + File.separatorChar + "icons"
+                + File.separatorChar + "png" + File.separatorChar);
+        path.append(name);
+        return path.toString();
     }
 
 

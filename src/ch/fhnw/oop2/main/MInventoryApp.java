@@ -1,15 +1,11 @@
 package ch.fhnw.oop2.main;
 
-import ch.fhnw.oop2.control.MInventoryCmd;
 import ch.fhnw.oop2.control.MInventoryController;
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
 import javafx.application.Application;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.effect.BoxBlur;
 import javafx.stage.Stage;
 
 import ch.fhnw.oop2.gui.MInventoryUI;
@@ -25,7 +21,6 @@ public class MInventoryApp extends Application{
     private MInventoryPresentationModel presModel;
     private MInventoryDataModel dataModel;
     private MInventoryController mInventoryController;
-    private MInventoryCmd mInventoryCmd;
 
     private int startHeight = 500;
     private int startWidth = 700;
@@ -33,11 +28,12 @@ public class MInventoryApp extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception{
 
+        System.out.println(System.getProperties());
+
         dataModel = new MInventoryDataModel();
         presModel = new MInventoryPresentationModel();
         mInventoryController = new MInventoryController(dataModel);
         dataModel.setMInventoryObjectListProperty(mInventoryController.readObjectsFromFile());
-        dataModel.setMInventoryObjectListProxyProperty(mInventoryController.readObjectsFromFile());
         dataModel.setMInventoryController(mInventoryController);
 
         // -- setup the main UI --
@@ -77,7 +73,7 @@ public class MInventoryApp extends Application{
 
         primaryStage.show();
 
-        mInventoryCmd = new MInventoryCmd();
+        dataModel.noFilter();
     }
 
     public static void main(String[] args) {

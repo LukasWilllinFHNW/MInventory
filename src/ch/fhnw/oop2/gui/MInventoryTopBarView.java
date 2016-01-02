@@ -38,7 +38,7 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
 
     @Override
     public void initializeLayout() {
-
+        this.setSpacing(5);
     }
 
     @Override
@@ -49,11 +49,11 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
     @Override
     public void initializeControls() {
 
-        this.addButton = new Button("+");
+        this.addButton = presModel.createButton("+");
             addButton.disableProperty().bind(presModel.getAddDisabledProperty());
-        this.deleteButton = new Button("-");
+        this.deleteButton = presModel.createButton("-");
             deleteButton.disableProperty().bind(presModel.getAddDisabledProperty());
-        this.saveButton = new Button("save");
+        this.saveButton = presModel.createButton("save");
             saveButton.disableProperty().bind(presModel.getAddDisabledProperty());
     }
 
@@ -77,8 +77,14 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
             dataModel.save(); });
     }
 
+    @Override
     public void addListeners() {
 
+    }
+
+    @Override
+    public void applyStylesheet() {
+        this.setId("topBarView");
     }
 
     private void createNewObjectDialog() {

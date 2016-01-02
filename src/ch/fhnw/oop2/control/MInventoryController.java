@@ -83,7 +83,7 @@ public class MInventoryController {
         try (BufferedWriter writer = Files.newBufferedWriter(getPath(CSV_FILE_NAME, filesInSameFolder), StandardCharsets.UTF_8) ) {
             writer.write(csv.FILE_HEADER);
             writer.newLine();
-            mInventoryObjectList.stream().forEach(object -> {
+            dataModel.getMInventoryObjectSimpleListProperty().stream().forEach(object -> {
                 try {
                     if(object != null) {
                         writer.write(dataModel.infoAsLine(object.getId()));

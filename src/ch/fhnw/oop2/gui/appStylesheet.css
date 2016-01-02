@@ -1,10 +1,14 @@
 #MInventoryUI {
 	-fx-background-color: rgba(255, 255, 255, 1);
-	-fx-padding: 0 5 0 5;
+	-fx-padding: 5;
 }
 
 #PreviewView {
     -fx-background-color: rgba(20, 20, 20, 1);
+}
+
+#topBarView {
+	-fx-padding: 0 0 5 0;
 }
 
 #detailedViewGrid {
@@ -27,4 +31,21 @@
  	-fx-background-insets: 40;
   	-fx-background-radius: 10;
 	-fx-alignment: top-center;
+}
+
+
+#styledButton {
+	-fx-background-color: #8bc6f7;
+	-fx-border-width: 2;
+	-fx-border-radius: 3;
+	-fx-border-color: #34302d;
+	-fx-background-radius: 4;
+}
+
+#styledButton:hover {
+	-fx-background-color: #dfe9ff;
+}
+
+#styledButton:pressed {
+	-fx-background-color: #7ba4ca;
 }

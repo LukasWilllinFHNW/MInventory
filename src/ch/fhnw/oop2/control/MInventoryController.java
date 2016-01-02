@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,7 +85,23 @@ public class MInventoryController {
     }
 
     public void writeObjectsToFile() {
-        try (BufferedWriter writer = Files.newBufferedWriter(getPath(CSV_FILE_NAME, filesInSameFolder), StandardCharsets.UTF_8) ) {
+        File save = new File(getPath(CSV_FILE_NAME, filesInSameFolder).toString());
+        File path = new File(getPath(null, filesInSameFolder).toString());
+        File images = new File(getPath(IMAGE_FOLDER_NAME, filesInSameFolder).toString());
+        // Check for non existing folders and files
+        if (!save.exists() || !path.exists() || !images.exists()) {
+            try {
+                if (!path.exists())
+                    path.mkdir();
+                if (!images.exists())
+                    images.mkdir();
+                if (!save.exists())
+                    save.createNewFile();
+            } catch (IOException ioe) {
+                System.out.println("Creating save file failed " + ioe.getMessage());
+            }
+        }
+        try (BufferedWriter writer = Files.newBufferedWriter(getPath(CSV_FILE_NAME, filesInSameFolder), StandardCharsets.UTF_8)) {
             writer.write(csv.FILE_HEADER);
             writer.newLine();
             dataModel.getMInventoryObjectSimpleListProperty().stream().forEach(object -> {
@@ -100,7 +117,7 @@ public class MInventoryController {
             writer.flush();
             writer.close();
         } catch (IOException e) {
-            throw new IllegalStateException("save failed");
+            throw new IllegalStateException("save failed " + e.getMessage());
         }
 
     }
@@ -139,7 +156,7 @@ public class MInventoryController {
                 return Paths.get(composePath(decomposedPath, fileName));
             }
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -187,7 +204,7 @@ public class MInventoryController {
             sb.append(folderName);
             sb.append(File.separatorChar);
         }
-        if (additionalFileName != null) sb.append(additionalFileName);
+        if (additionalFileName != null && !additionalFileName.isEmpty()) sb.append(additionalFileName);
         return sb.toString();
     }
 

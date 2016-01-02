@@ -72,6 +72,10 @@ public class MInventoryController {
             objectList = new ArrayList<>();
             objectList.add(createMInventoryObject(SAMPLE_STORAGE));
             objectList.add(createMInventoryObject(SAMPLE_ITEM));
+        } catch (IllegalStateException ise) {
+            objectList = new ArrayList<>();
+            objectList.add(createMInventoryObject(SAMPLE_STORAGE));
+            objectList.add(createMInventoryObject(SAMPLE_ITEM));
         }
         ObservableList<MInventoryObject> observableList = FXCollections.observableArrayList(objectList);
         mInventoryObjectList = new SimpleListProperty<>();

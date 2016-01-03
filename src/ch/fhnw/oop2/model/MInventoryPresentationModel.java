@@ -31,14 +31,12 @@ public class MInventoryPresentationModel {
     private static IntegerProperty x = new SimpleIntegerProperty(0);
     private static IntegerProperty y = new SimpleIntegerProperty(0);
 
-    private ObservableList<MInventoryObject> objectList;
-
     // --- CONSTRUCTORS ---
     /**
      * Create a new MInventoryPresentationModel.
      */
     public MInventoryPresentationModel() {
-        this.objectList = FXCollections.observableArrayList();
+
     }
 
 
@@ -46,6 +44,12 @@ public class MInventoryPresentationModel {
     public Button createButton(String text) {
         Button button = new Button(text);
         button.setId("styledButton");
+        return button;
+    }
+
+    public Button createImmersiveButton(String text) {
+        Button button = new Button(text);
+        button.setId("styledImmersiveButton");
         return button;
     }
 
@@ -59,21 +63,26 @@ public class MInventoryPresentationModel {
         return path.toString();
     }
 
+    public void useCreationStyle() {
+        getSaveDisabledProperty().setValue(false);
+        getAddDisabledProperty().setValue(true);
+        doBlur();
+    }
+
+    public void useEditorStyle() {
+        getSaveDisabledProperty().setValue(true);
+        getAddDisabledProperty().setValue(false);
+        undoBlur();
+    }
+
 
     // --- GETTER ---
-    public ObservableList<MInventoryObject> getObjectList() {
-        return objectList;
-    }
     public StringProperty getWindowTitleTextProperty() {
         return this.windowTitle;
     }
 
     public double getX() { return x.getValue().doubleValue(); }
     public double getY() { return y.getValue().doubleValue(); }
-
-    public MInventoryUI getMainUI() {
-        return (MInventoryUI) this.mainUI;
-    }
 
     // --- GETTER PROPERTY ---
     public IntegerProperty getHeightProperty() { return heightProperty; }
@@ -94,16 +103,5 @@ public class MInventoryPresentationModel {
 
     public void doBlur() { this.blurProperty.setValue(80);}
     public void undoBlur() { this.blurProperty.setValue(0);}
-
-    public void enterAddingMode() {
-        getSaveDisabledProperty().setValue(false);
-        getAddDisabledProperty().setValue(true);
-    }
-
-    public void enterEditMode() {
-        getSaveDisabledProperty().setValue(true);
-        getAddDisabledProperty().setValue(false);
-        undoBlur();
-    }
 
 }

@@ -126,12 +126,12 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
         cancelButton.disableProperty().bind(presModel.getSaveDisabledProperty());
 
         this.createButton.setOnMouseClicked(event -> {
-            presModel.enterEditMode();
+            presModel.useEditorStyle();
             overlay.close();
             dataModel.createNewObject();
         });
         this.cancelButton.setOnMouseClicked(event -> {
-            presModel.enterEditMode();
+            presModel.useEditorStyle();
             overlay.close();
             dataModel.cancelNewObject();
         });
@@ -141,7 +141,7 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
             box.setAlignment(Pos.CENTER);
 
         overlay = new Overlay(presModel, dataModel, 600, 600);
-        presModel.enterAddingMode();
+        presModel.useCreationStyle();
         overlay.addNode(box);
         overlay.addNode(new MInventoryDetailedView(presModel, dataModel));
     }

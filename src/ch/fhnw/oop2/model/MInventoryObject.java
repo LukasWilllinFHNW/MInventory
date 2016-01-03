@@ -19,7 +19,10 @@ public abstract class MInventoryObject {
     /** Weight of object in kilo gram*/
     private DoubleProperty weight = new SimpleDoubleProperty();
     private ObjectProperty<Color> color = new SimpleObjectProperty<>();
-    /** Dimensions in meter */
+    /** Dimensions in meter
+     * index 0 being the length
+     * index 1 being the height
+     * index 2 being the depth */
     private DoubleProperty[] dimensions = new SimpleDoubleProperty[3];
     /** Per cent value indicating how damaged the object is. */
     private DoubleProperty stateOfDecay = new SimpleDoubleProperty();;
@@ -87,13 +90,22 @@ public abstract class MInventoryObject {
         return dims; }
     public double getStateOfDecay() { return stateOfDecay.getValue(); }
     public Type getType() { return type; }
-    public String getDistinctAttribtue() { return distinctAttribute.getValue(); }
+    public String getDistinctAttribute() { return distinctAttribute.getValue(); }
 
 
     // --- PROPERTY GETTER ---
     public StringProperty getNameProperty() { return this.name; }
     public StringProperty getDescriptionProperty() { return this.description; }
     public ObjectProperty<CustomImage> getImageProperty() { return this.imageProperty; }
+    public DoubleProperty getWeightProperty() { return this.weight; }
+    public ObjectProperty<Color> colorProperty() { return color; }
+    public DoubleProperty getStateOfDecayProperty() { return stateOfDecay; }
+    public DoubleProperty getHeightProperty() { return dimensions[1]; }
+    public DoubleProperty getLengthProperty() { return dimensions[0]; }
+    public DoubleProperty getDepthProperty() { return dimensions[2]; }
+    public StringProperty getTypeProperty() { return type.getTypeProperty(); }
+    public StringProperty getUsageTypeProperty() { return type.getUsageTypeProperty(); }
+    public StringProperty getDistinctAttributeProperty() { return distinctAttribute; }
 
 
     // --- SETTER ---
@@ -101,6 +113,29 @@ public abstract class MInventoryObject {
         this.name.setValue(name);
     }
     public void setDescription(String description) { this.description.setValue(description); }
+    /**
+     * set weight in kilogram
+     * @param weight in kilogram */
+    public void setWeight(double weight) { this.weight.set(weight); }
+    public void setColor(Color color) { this.color.set(color); }
+    public void setLength(double length) { this.dimensions[0].setValue(length); }
+    public void setHeight(double height) { this.dimensions[1].setValue(height); }
+    public void setDepth(double depth) { this.dimensions[2].setValue(depth); }
+    /**
+     * Set dimension by array in the following order
+     * 1 being the length
+     * 2 being the height
+     * 3 being the depth
+     * @param dimensions array of length, height, depth */
+    public void setDimensions(double[] dimensions) {
+        this.dimensions[0].setValue(dimensions[0]);
+        this.dimensions[1].setValue(dimensions[1]);
+        this.dimensions[2].setValue(dimensions[2]);
+    }
+    public void setStateOfDecay(double stateOfDecay) { this.stateOfDecay.setValue(stateOfDecay); }
+    public void setType(String type) { this.type.setType(type); }
+    public void setUsageType(String usageType) { this.type.setUsageType(usageType); }
+    public void setDistinctAttribute(String distinctAttribute) { this.distinctAttribute.setValue(distinctAttribute); }
 
 
 }

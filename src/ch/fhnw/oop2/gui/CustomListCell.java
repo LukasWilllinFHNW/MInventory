@@ -67,11 +67,11 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
             if (this.getItem() != null) dataModel.updateSelection(this.getItem().getId()); });*/
         this.setOnDragDropped( event -> {
             if (super.getItem() instanceof MInventoryStorage &&(MInventoryObject)event.getAcceptingObject() != null) {
-                try {
+                //try {
                     ((MInventoryStorage) super.getItem()).addObjectById((((MInventoryObject) event.getAcceptingObject()).getId()));
-                } catch (MInventoryException e) {
+                /*} catch (MInventoryException e) {
 
-                }
+                }*/
             };
         });
     }
@@ -82,6 +82,11 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
             if (newValue && super.getItem() != null) {
                 dataModel.updateSelection(super.getItem().getId());
             } });
+        dataModel.getCurrentSelectedIdProperty().addListener((observable, oldValue, newValue) -> {
+            if (this.getItem() != null) {
+                if (this.getItem().getId() == newValue.intValue()) this.requestFocus();
+            }
+        });
     }
 
     private void updateGraphic(){

@@ -67,82 +67,64 @@ public class MInventoryDataModel {
         };
         if (proxy.getIdentifier() == 'i' && temporaryObject != null) {
             mInventoryObjectList.add(new MInventoryItem(newID, temporaryObject));
-            filterByItem();
+            filterByItem(mInventoryObjectList, mInventoryObjectListProxy);
         }
         if (proxy.getIdentifier() == 's' && temporaryObject != null) {
             mInventoryObjectList.add(new MInventoryStorage(newID, temporaryObject));
-            filterByStorage();
+            filterByStorage(mInventoryObjectList, mInventoryObjectListProxy);
         }
         unselect(currentSelectedId.get());
         select(newID);
     }
 
     // -- filter and search --
-    public void noFilter() {
-        mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
+    public void noFilter(ListProperty<MInventoryObject> inList, ListProperty<MInventoryObject> toList) {
+        toList.setValue(FXCollections.observableList(inList.stream()
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
-        exceptionSafeSelectFirst();
     }
-    public void filterByStorage() {
-        mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
+    public void filterByStorage(ListProperty<MInventoryObject> inList, ListProperty<MInventoryObject> toList) {
+        toList.setValue(FXCollections.observableList(inList.stream()
                 .filter(mInventoryObject -> (mInventoryObject instanceof MInventoryStorage))
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
-        exceptionSafeSelectFirst();
     }
-    public void filterByItem() {
-        mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
+    public void filterByItem(ListProperty<MInventoryObject> inList, ListProperty<MInventoryObject> toList) {
+        toList.setValue(FXCollections.observableList(inList.stream()
                 .filter(mInventoryObject -> (mInventoryObject instanceof MInventoryItem))
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
-        exceptionSafeSelectFirst();
     }
-    public ListProperty<MInventoryObject> searchFor(String oldSearch, String newSearch) {
+    public void searchFor(String oldSearch, String newSearch,ListProperty<MInventoryObject> inList , ListProperty<MInventoryObject> toList) {
+        newSearch.trim();
+        String loweredNewSearch = newSearch.toLowerCase();
         if (newSearch.length() > oldSearch.length()) { //faster search in proxy list -> shrinking object amount
-            newSearch.trim();
-            newSearch.toLowerCase();
-            if (newSearch.length() < 2) {
-                try {
-                    int id = Integer.parseInt(newSearch);
-                    mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectListProxy.stream()
-                            .filter(object -> (object.getId() == id))
-                            .map(object -> getById(object.getId()))
-                            .collect(Collectors.toList())));
-                } catch (NumberFormatException nfe) {
-                    System.out.println(nfe.getMessage() + nfe.getStackTrace().toString());
-                }
-            } else {
-                mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectListProxy.stream()
-                        .filter(object -> (infoAsLine(object.getId()).toLowerCase().contains(newSearch)))
-                        .map(object -> getById(object.getId()))
-                        .collect(Collectors.toList())));
-            }
+
+            toList.setValue(FXCollections.observableList(toList.stream()
+                    .filter(object -> {
+                        String containing = (infoAsLine(object.getId())).toLowerCase();
+                        if (containing.contains(loweredNewSearch)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    })
+                    .map(object -> getById(object.getId()))
+                    .collect(Collectors.toList())));
         } else { // Slower search in object list if new search string is shorter -> growing object amount
-            newSearch.trim();
-            newSearch.toLowerCase();
-            if (newSearch.isEmpty()) {
-                noFilter();
-            }
-            if (newSearch.length() < 2) {
-                try {
-                    int id = Integer.parseInt(newSearch);
-                    mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
-                            .filter(object -> (object.getId() == id))
-                            .map(object -> getById(object.getId()))
-                            .collect(Collectors.toList())));
-                } catch (NumberFormatException nfe) {
-                    System.out.println(nfe.getMessage() + nfe.getStackTrace().toString());
-                }
-            } else {
-                mInventoryObjectListProxy.setValue(FXCollections.observableList(mInventoryObjectList.stream()
-                        .filter(object -> (infoAsLine(object.getId()).toLowerCase().contains(newSearch)))
-                        .map(object -> getById(object.getId()))
-                        .collect(Collectors.toList())));
-            }
+            toList.setValue(FXCollections.observableList(inList.stream()
+                    .filter(object -> {
+                        String containing = (infoAsLine(object.getId())).toLowerCase();
+                        if (containing.contains(loweredNewSearch)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    })
+                    .map(object -> getById(object.getId()))
+                    .collect(Collectors.toList())));
         }
-        exceptionSafeSelectFirst();
-        return mInventoryObjectListProxy;
+        if (toList.size() == 1) exceptionSafeSelectFirst(toList);
     }
 
     // -- selection handling --
@@ -157,9 +139,9 @@ public class MInventoryDataModel {
     /**
      * Selects the first object in object list proxy catching all expected exceptions
      */
-    private void exceptionSafeSelectFirst(){
+    private void exceptionSafeSelectFirst(ListProperty<MInventoryObject> fromList){
         try {
-            updateSelection(mInventoryObjectListProxy.get(0).getId());
+            updateSelection(fromList.get(0).getId());
         } catch (IndexOutOfBoundsException iobe) {
             System.out.println(iobe.getMessage() + iobe.getStackTrace().toString() + "No object in list");
         }
@@ -262,10 +244,6 @@ public class MInventoryDataModel {
 
 
     // --- GETTER ---
-    private List<MInventoryObject> getMInventoryObjectList() {
-        return (List<MInventoryObject>) this.mInventoryObjectList.getValue();
-    }
-
     public MInventoryObject getById(int id) {
         if (id == 0) {
             return temporaryObject;
@@ -276,18 +254,19 @@ public class MInventoryDataModel {
         return object.isPresent() ? object.get() : null;
     }
 
+    public int getCurrentId() { return currentSelectedId.intValue(); }
+
     public MInventoryObjectProxy getProxy() {
         return this.proxy;
     }
 
 
     // --- PROPERTY GETTER ---
-    public SimpleListProperty<MInventoryObject> getMInventoryObjectSimpleListProperty() {
+    public SimpleListProperty<MInventoryObject> getMInventoryObjectList() {
         return this.mInventoryObjectList;
     }
-    public SimpleListProperty<MInventoryObject> getMInventoryObjectProxySimpleListProperty() {
-        return this.mInventoryObjectListProxy;
-    }
+    public SimpleListProperty<MInventoryObject> getMInventoryObjectListProxy() { return this.mInventoryObjectListProxy; }
+    public IntegerProperty getCurrentSelectedIdProperty() { return currentSelectedId; }
 
 
     // --- SETTER ---

@@ -3,18 +3,9 @@ package ch.fhnw.oop2.gui;
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryObject;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
-import javafx.event.Event;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.ListCell;
+import javafx.beans.property.ListProperty;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 
 /**
  * Created by Lukas on 01.12.2015.
@@ -24,8 +15,12 @@ public class MInventoryListView extends ListView implements ViewTemplate{
     private MInventoryPresentationModel presModel;
     private MInventoryDataModel dataModel;
 
+    private int currentSelectedObjectId;
+
     private KeyEvent delPressed;
 
+
+    // --- CONSTRUCTORS ---
     public MInventoryListView(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
 
         this.presModel = presModel;
@@ -36,11 +31,34 @@ public class MInventoryListView extends ListView implements ViewTemplate{
         initSequence();
     }
 
+
+    // --- API ---
+    public int getCurrentSelectedObjectId() {
+        return currentSelectedObjectId;
+    }
+
+    public ListProperty<MInventoryObject> connectToModel() {
+        this.itemsProperty().bind(dataModel.getMInventoryObjectListProxy());
+        this.disableProperty().bind(presModel.getAddDisabledProperty());
+
+        return dataModel.getMInventoryObjectListProxy();
+    }
+
+    public ListProperty<MInventoryObject> connectToListProperty(ListProperty<MInventoryObject> otherProxy) {
+        this.itemsProperty().bind(otherProxy);
+        return otherProxy;
+    }
+
+    // -- init sequence --
     @Override
     public void initializeControls() {
 
-        this.setCellFactory(lv -> {
+        this.setCellFactory(listView -> {
             CustomListCell cell = new CustomListCell(presModel, dataModel);
+            // Track the selected Object
+            cell.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                currentSelectedObjectId = cell.getItem().getId();
+            });
             return cell ; });
     }
 
@@ -51,8 +69,7 @@ public class MInventoryListView extends ListView implements ViewTemplate{
 
     @Override
     public void addBindings(){
-        this.itemsProperty().bind(dataModel.getMInventoryObjectProxySimpleListProperty());
-        this.disableProperty().bind(presModel.getAddDisabledProperty());
+
     }
 
     @Override
@@ -74,5 +91,4 @@ public class MInventoryListView extends ListView implements ViewTemplate{
     public void addEvents() {
 
     }
-
 }

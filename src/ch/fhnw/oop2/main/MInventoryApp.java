@@ -22,8 +22,8 @@ public class MInventoryApp extends Application{
     private MInventoryDataModel dataModel;
     private MInventoryController mInventoryController;
 
-    private int startHeight = 500;
-    private int startWidth = 700;
+    private int startHeight = 565;
+    private int startWidth = 820;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -54,12 +54,14 @@ public class MInventoryApp extends Application{
         primaryStage.setMinHeight(startHeight);
         primaryStage.setMinWidth(startWidth);
 
+        //Track position of window
         primaryStage.xProperty().addListener((observable, oldValue, newValue) -> {
             presModel.setX(newValue.doubleValue());
         });
         primaryStage.yProperty().addListener((observable, oldValue, newValue) -> {
             presModel.setY(newValue.doubleValue());
         });
+        // Track size of window
         presModel.getHeightProperty().setValue(startHeight);
         primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
             presModel.getHeightProperty().setValue(newValue);
@@ -69,11 +71,12 @@ public class MInventoryApp extends Application{
             presModel.getWidthProperty().setValue(newValue);
         });
 
+        // TODO: remove when saving and loading app settings
         primaryStage.centerOnScreen();
 
         primaryStage.show();
 
-        dataModel.noFilter();
+        dataModel.noFilter(dataModel.getMInventoryObjectList(), dataModel.getMInventoryObjectListProxy());
     }
 
     public static void main(String[] args) {
@@ -100,7 +103,7 @@ public class MInventoryApp extends Application{
 
 
 /**
- * This is just to complete documentation for classes MediaViewPane and ImageViewPane
+ * This is just to complete documentation for ImageViewPane
  *
  * bug posted on https://bugs.openjdk.java.net/browse/JDK-8091216
  * creation date: 2012-05-03 08:45

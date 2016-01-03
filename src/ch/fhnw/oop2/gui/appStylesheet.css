@@ -7,6 +7,10 @@
     -fx-background-color: rgba(20, 20, 20, 1);
 }
 
+#borderlessPane {
+	-fx-background-color: transparent;
+}
+
 #topBarView {
 	-fx-padding: 0 0 5 0;
 }
@@ -35,17 +39,45 @@
 
 
 #styledButton {
-	-fx-background-color: #8bc6f7;
-	-fx-border-width: 2;
-	-fx-border-radius: 3;
-	-fx-border-color: #34302d;
+	-fx-background-color: white;
+	-fx-border-width: 1;
+	-fx-border-color: #CBCBCB;
+
+	-fx-border-radius: 5;
+	-fx-background-radius: 5;
+}
+#styledButton:hover {
+	-fx-background-color: #FEFEFE;
+	-fx-border-color: darkslategrey;
+}
+#styledButton:pressed {
+	-fx-background-color: grey;
+	-fx-border-color: darkslategrey;
+}
+#styledButton:focused {
+	-fx-background-color: whitesmoke;
+	-fx-border-color: darkslategrey;
+}
+
+#styledImmersiveButton {
+	-fx-background-color: transparent;
+	-fx-text-fill: #DEDEDE;
+	-fx-border-width: 1;
+	-fx-border-color: white;
+	-fx-border-radius: 4;
 	-fx-background-radius: 4;
 }
-
-#styledButton:hover {
-	-fx-background-color: #dfe9ff;
+#styledImmersiveButton:hover {
+	-fx-background-color: rgba(255, 255, 255, 0.2);
+}
+#styledImmersiveButton:pressed {
+	-fx-background-color: rgba(255, 255, 255, 0);
+}
+#styledImmersiveButton:focused{
+	-fx-background-color: rgba(255, 255, 255, 0.1);
 }
 
-#styledButton:pressed {
-	-fx-background-color: #7ba4ca;
+.slider {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
 }

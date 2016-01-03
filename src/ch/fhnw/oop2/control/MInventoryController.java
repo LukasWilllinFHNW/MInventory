@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -104,7 +103,7 @@ public class MInventoryController {
         try (BufferedWriter writer = Files.newBufferedWriter(getPath(CSV_FILE_NAME, filesInSameFolder), StandardCharsets.UTF_8)) {
             writer.write(csv.FILE_HEADER);
             writer.newLine();
-            dataModel.getMInventoryObjectSimpleListProperty().stream().forEach(object -> {
+            dataModel.getMInventoryObjectList().stream().forEach(object -> {
                 try {
                     if(object != null) {
                         writer.write(dataModel.infoAsLine(object.getId()));
@@ -122,6 +121,11 @@ public class MInventoryController {
 
     }
 
+    /**
+     * Copies an image to save location with a new
+     * @param i image to be copied
+     * @param newFileName target folder and name
+     */
     public void copyImage(CustomImage i, String newFileName) {
         List<String> list = (List<String>) pathAsList.clone();
             list.add(IMAGE_FOLDER_NAME);
@@ -140,6 +144,14 @@ public class MInventoryController {
 
     // --- HELPERS ---
 
+    /**
+     * Creates a path appends a file or folder name to it
+     * The path can be either user.home or the same folder like the app
+     * is System independent
+     * @param fileName the file or folder name to append
+     * @param locatedInSameFolder true if files should be saved in same folder, false if files should be saved in user.home folder
+     * @return
+     */
     private Path getPath(String fileName, boolean locatedInSameFolder) {
         ArrayList<String> decomposedPath;
         Path p;

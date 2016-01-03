@@ -4,14 +4,11 @@ import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -62,10 +59,12 @@ public class Overlay extends Stage implements ViewTemplate {
     }
 
     public void close() {
+        presModel.useEditorStyle();
         super.close();
     }
 
     public void open() {
+        presModel.useCreationStyle();
         super.show();
     }
 
@@ -106,7 +105,6 @@ public class Overlay extends Stage implements ViewTemplate {
     @Override
     public void addEvents() {
         backButton.setOnMouseClicked(event -> {
-            presModel.enterEditMode();
             close();
         });
     }
@@ -125,7 +123,7 @@ public class Overlay extends Stage implements ViewTemplate {
 
     @Override
     public void applySpecialStyles() {
-        presModel.doBlur();
+
     }
 
 

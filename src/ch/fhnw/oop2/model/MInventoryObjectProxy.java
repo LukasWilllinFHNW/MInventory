@@ -1,6 +1,8 @@
 package ch.fhnw.oop2.model;
 
 import ch.fhnw.oop2.gui.CustomImage;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 

@@ -227,7 +227,7 @@ public class MInventoryController {
         StringBuffer sb = new StringBuffer();
 
         String osName = System.getProperty("os.name");
-        osName.toLowerCase();
+        osName = osName.toLowerCase();
         if (osName.contains("mac")) sb.append(File.separatorChar);
 
         for (String folderName : list) {

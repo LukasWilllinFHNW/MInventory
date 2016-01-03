@@ -27,7 +27,7 @@ public class MInventoryObjectProxy extends MInventoryObject {
      */
     public MInventoryObjectProxy(char identifier, int id, String name, String description, CustomImage image,
                                  double weight, Color color, double[] dimensions,
-                                 double stateOfDecay, Type type, String distinctAttribute) {
+                                 int stateOfDecay, Type type, String distinctAttribute) {
         super(-1, name, description, image, weight, color, dimensions, stateOfDecay, type, distinctAttribute);
         this.identifier = identifier;
     }

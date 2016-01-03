@@ -77,6 +77,7 @@ public class MInventoryApp extends Application{
         primaryStage.show();
 
         dataModel.noFilter(dataModel.getMInventoryObjectList(), dataModel.getMInventoryObjectListProxy());
+        if (!dataModel.getMInventoryObjectList().isEmpty()) dataModel.updateSelection(dataModel.getMInventoryObjectList().get(0).getId());
     }
 
     public static void main(String[] args) {

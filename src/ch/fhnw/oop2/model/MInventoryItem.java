@@ -20,7 +20,7 @@ public class MInventoryItem extends MInventoryObject {
      */
     public MInventoryItem(int id, String name, String description, CustomImage image, double weight,
                           Color color, double[] dimensions,
-                          double stateOfDecay, Type type, String distinctAttribute) {
+                          int stateOfDecay, Type type, String distinctAttribute) {
 
         super(id, name, description, image, weight, color, dimensions, stateOfDecay, type, distinctAttribute);
     }

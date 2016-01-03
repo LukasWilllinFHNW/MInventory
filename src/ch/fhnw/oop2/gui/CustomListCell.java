@@ -82,11 +82,6 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
             if (newValue && super.getItem() != null) {
                 dataModel.updateSelection(super.getItem().getId());
             } });
-        dataModel.getCurrentSelectedIdProperty().addListener((observable, oldValue, newValue) -> {
-            if (this.getItem() != null) {
-                if (this.getItem().getId() == newValue.intValue()) this.requestFocus();
-            }
-        });
     }
 
     private void updateGraphic(){

@@ -25,12 +25,13 @@ public abstract class MInventoryObject {
      * index 2 being the depth */
     private DoubleProperty[] dimensions = new SimpleDoubleProperty[3];
     /** Per cent value indicating how damaged the object is. */
-    private DoubleProperty stateOfDecay = new SimpleDoubleProperty();;
+    private IntegerProperty stateOfDecay = new SimpleIntegerProperty();;
     /** Type of the object. */
     private Type type;
     /** What makes is it different. */
     private StringProperty distinctAttribute = new SimpleStringProperty();
     private ObjectProperty imageProperty = new SimpleObjectProperty<CustomImage>();
+    private StringProperty imageFileExtensions;
 
 
 
@@ -38,7 +39,7 @@ public abstract class MInventoryObject {
     /**
      * Create a new MInventoryObject */
     public MInventoryObject(int id, String name, String description, CustomImage image, double weight, Color color, double[] dimensions,
-                            double stateOfDecay, Type type, String distinctAttribute) {
+                            int stateOfDecay, Type type, String distinctAttribute) {
         this.id = id;
         this.name.setValue(name);
         this.description.setValue(description);
@@ -71,26 +72,65 @@ public abstract class MInventoryObject {
         info.append(this.id + ";");
         info.append(this.getName() + ";");
         info.append(this.getDescription() + ";");
+        info.append(this.type.getType() + ";");
+        info.append(this.type.getUsageType() + ";");
+        info.append(this.getImageFileExtension() + ";");
+        info.append(this.getWeight() + ";");
+        info.append(this.dimensions[0].get() + ":"
+                + this.dimensions[1].get() + ":"
+                + this.dimensions[2].get() + ";");
+        info.append(this.color.get().getRed() + ":"
+                + this.color.get().getGreen() + ":"
+                + this.color.get().getBlue() + ":"
+                + this.color.get().getOpacity() + ";");
+        info.append(this.getStateOfDecay() + ";");
+        info.append(this.getDistinctAttribute() + ";");
+        info.append("#endOfLine;");
+
+        return info.toString();
+    }
+
+    protected String searchInfo() {
+        StringBuffer info = new StringBuffer();
+
+        info.append(this.getName()
+                + this.getDescription()
+                + this.type.getType()
+                + this.type.getUsageType()
+                + this.getDistinctAttribute());
 
         return info.toString();
     }
 
 
-    // --- GETTER ---
-    public String getName(){
-        return name.getValue();
+    public String getImageFileExtension() {
+        if (getImage() != null) {
+            return ((CustomImage)imageProperty.get()).getPath()
+                    .trim()
+                    .substring( ((CustomImage)imageProperty.get()).getPath()
+                            .trim()
+                            .lastIndexOf('.')
+                    );
+        } else {
+            return "";
+        }
+
     }
-    public String getDescription() { return description.getValue(); }
+
+
+    // --- GETTER ---
+    public String getName(){return name.get();}
+    public String getDescription() { return description.get(); }
     public Image getImage() { return (Image)imageProperty.getValue(); }
     public int getId() { return id; }
-    public double getWeight() { return weight.getValue(); }
-    public Color getColor() { return color.getValue(); }
+    public double getWeight() { return weight.get(); }
+    public Color getColor() { return color.get(); }
     public double[] getDimensions() {
-        double[] dims = {dimensions[0].getValue(), dimensions[1].getValue(), dimensions[2].getValue()};
+        double[] dims = {dimensions[0].get(), dimensions[1].get(), dimensions[2].get()};
         return dims; }
-    public double getStateOfDecay() { return stateOfDecay.getValue(); }
+    public int getStateOfDecay() { return stateOfDecay.get(); }
     public Type getType() { return type; }
-    public String getDistinctAttribute() { return distinctAttribute.getValue(); }
+    public String getDistinctAttribute() { return distinctAttribute.get(); }
 
 
     // --- PROPERTY GETTER ---
@@ -98,8 +138,8 @@ public abstract class MInventoryObject {
     public StringProperty getDescriptionProperty() { return this.description; }
     public ObjectProperty<CustomImage> getImageProperty() { return this.imageProperty; }
     public DoubleProperty getWeightProperty() { return this.weight; }
-    public ObjectProperty<Color> colorProperty() { return color; }
-    public DoubleProperty getStateOfDecayProperty() { return stateOfDecay; }
+    public ObjectProperty<Color> getColorProperty() { return color; }
+    public IntegerProperty getStateOfDecayProperty() { return stateOfDecay; }
     public DoubleProperty getHeightProperty() { return dimensions[1]; }
     public DoubleProperty getLengthProperty() { return dimensions[0]; }
     public DoubleProperty getDepthProperty() { return dimensions[2]; }
@@ -132,10 +172,8 @@ public abstract class MInventoryObject {
         this.dimensions[1].setValue(dimensions[1]);
         this.dimensions[2].setValue(dimensions[2]);
     }
-    public void setStateOfDecay(double stateOfDecay) { this.stateOfDecay.setValue(stateOfDecay); }
+    public void setStateOfDecay(int stateOfDecay) { this.stateOfDecay.setValue(stateOfDecay); }
     public void setType(String type) { this.type.setType(type); }
     public void setUsageType(String usageType) { this.type.setUsageType(usageType); }
     public void setDistinctAttribute(String distinctAttribute) { this.distinctAttribute.setValue(distinctAttribute); }
-
-
 }

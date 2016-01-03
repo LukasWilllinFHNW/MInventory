@@ -102,7 +102,7 @@ public class MInventoryDataModel {
 
             toList.setValue(FXCollections.observableList(toList.stream()
                     .filter(object -> {
-                        String containing = (infoAsLine(object.getId())).toLowerCase();
+                        String containing = (object.searchInfo()).toLowerCase();
                         if (containing.contains(loweredNewSearch)) {
                             return true;
                         } else {
@@ -114,7 +114,7 @@ public class MInventoryDataModel {
         } else { // Slower search in object list if new search string is shorter -> growing object amount
             toList.setValue(FXCollections.observableList(inList.stream()
                     .filter(object -> {
-                        String containing = (infoAsLine(object.getId())).toLowerCase();
+                        String containing = (object.searchInfo()).toLowerCase();
                         if (containing.contains(loweredNewSearch)) {
                             return true;
                         } else {
@@ -152,6 +152,16 @@ public class MInventoryDataModel {
             proxy.getNameProperty().unbindBidirectional(oldObject.getNameProperty());
             proxy.getDescriptionProperty().unbindBidirectional(oldObject.getDescriptionProperty());
             proxy.getImageProperty().unbindBidirectional(oldObject.getImageProperty());
+            proxy.getStateOfDecayProperty().unbindBidirectional(oldObject.getStateOfDecayProperty());
+            proxy.getTypeProperty().unbindBidirectional(oldObject.getTypeProperty());
+            proxy.getUsageTypeProperty().unbindBidirectional(oldObject.getUsageTypeProperty());
+            proxy.getWeightProperty().unbindBidirectional(oldObject.getWeightProperty());
+            proxy.getHeightProperty().unbindBidirectional(oldObject.getHeightProperty());
+            proxy.getDepthProperty().unbindBidirectional(oldObject.getDepthProperty());
+            proxy.getLengthProperty().unbindBidirectional(oldObject.getLengthProperty());
+            proxy.getColorProperty().unbindBidirectional(oldObject.getColorProperty());
+            proxy.getDistinctAttributeProperty().unbindBidirectional(oldObject.getDistinctAttributeProperty());
+
             proxy.setId(-1);
             proxy.setIdentifier(' ');
         }
@@ -165,6 +175,16 @@ public class MInventoryDataModel {
             proxy.getNameProperty().bindBidirectional(newObject.getNameProperty());
             proxy.getDescriptionProperty().bindBidirectional(newObject.getDescriptionProperty());
             proxy.getImageProperty().bindBidirectional(newObject.getImageProperty());
+            proxy.getStateOfDecayProperty().bindBidirectional(newObject.getStateOfDecayProperty());
+            proxy.getTypeProperty().bindBidirectional(newObject.getTypeProperty());
+            proxy.getUsageTypeProperty().bindBidirectional(newObject.getUsageTypeProperty());
+            proxy.getWeightProperty().bindBidirectional(newObject.getWeightProperty());
+            proxy.getHeightProperty().bindBidirectional(newObject.getHeightProperty());
+            proxy.getDepthProperty().bindBidirectional(newObject.getDepthProperty());
+            proxy.getLengthProperty().bindBidirectional(newObject.getLengthProperty());
+            proxy.getColorProperty().bindBidirectional(newObject.getColorProperty());
+            proxy.getDistinctAttributeProperty().bindBidirectional(newObject.getDistinctAttributeProperty());
+
             proxy.setId(newObject.getId());
             if(newID > 0 ) this.currentSelectedId.setValue(newObject.getId());
             if (newObject instanceof MInventoryStorage) proxy.setIdentifier('s');

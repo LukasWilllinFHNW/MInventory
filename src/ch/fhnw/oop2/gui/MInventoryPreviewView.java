@@ -17,6 +17,7 @@ import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,6 +126,9 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
         dataModel.getProxy().getImageProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 backgroundImagePane.setBackground(new Background(new BackgroundImage(newValue, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT)));
+            } else {
+                Paint fill = dataModel.getProxy().getColor();
+                backgroundImagePane.setBackground(new Background(new BackgroundFill(fill, CornerRadii.EMPTY, Insets.EMPTY)));
             }
         });
         dataModel.getCurrentSelectedIdProperty().addListener((observable, oldValue, newValue) -> {

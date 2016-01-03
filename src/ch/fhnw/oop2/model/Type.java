@@ -26,9 +26,9 @@ public class Type {
 
     // --- GETTER ---
     /** Get definition on how the object is used or what it is used for. */
-    public String getUsageType() { return new String(this.usageType.toString()); }
+    public String getUsageType() { return usageType.get(); }
     /** Get the general type identifier of the object. */
-    public String getType() { return new String(this.type.toString()); }
+    public String getType() { return type.get(); }
 
 
     // --- GETTER PROPERTY ---

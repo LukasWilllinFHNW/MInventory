@@ -29,10 +29,14 @@ public class MInventoryController {
     private final String IMAGE_FOLDER_NAME = "images";
     private final String DATA_FOLDER_NAME = "MInventory";
 
-    private final String SPLITTER = ";";
-
-    private final String[] SAMPLE_STORAGE = {"-1", "s", "1", "Your first storage :)", "Try to drag item into storage."};
-    private final String[] SAMPLE_ITEM = {"-1", "i", "2", "Your first item :D", "Try to drag me into the storage."};
+    private final String SAMPLE_STORAGE = "-1;s;1;Your first storage :);Try to put this item into  the storage.;"
+            + "a type;a usage type;.jpg;0.0;3.0:2.0:0.0;"
+            + "0.8:0.2:0.2:1.0;"
+            + "0;;#endOfLine;";
+    private final String SAMPLE_ITEM = "-1;i;2;Your first item :D;Try to put me into the storage.;"
+            + "a type;a usage type;.jpg;0.0;0.0:0.0:0.0;"
+            + "0.2:0.8:0.2:1.0;"
+            + "0;;#endOfLine;";
 
     private MInventoryDataModel dataModel;
 
@@ -70,16 +74,26 @@ public class MInventoryController {
                     .collect(Collectors.toList());
         } catch (NullPointerException npe) {
             objectList = new ArrayList<>();
-            objectList.add(createMInventoryObject(SAMPLE_STORAGE));
-            objectList.add(createMInventoryObject(SAMPLE_ITEM));
+            objectList.add(createMInventoryObject(SAMPLE_STORAGE.split(";")));
+            objectList.add(createMInventoryObject(SAMPLE_ITEM.split(";")));
         } catch (IllegalStateException ise) {
             objectList = new ArrayList<>();
-            objectList.add(createMInventoryObject(SAMPLE_STORAGE));
-            objectList.add(createMInventoryObject(SAMPLE_ITEM));
+            objectList.add(createMInventoryObject(SAMPLE_STORAGE.split(";")));
+            objectList.add(createMInventoryObject(SAMPLE_ITEM.split(";")));
         }
         ObservableList<MInventoryObject> observableList = FXCollections.observableArrayList(objectList);
         mInventoryObjectList = new SimpleListProperty<>();
         mInventoryObjectList.setValue(observableList);
+
+        if (!mInventoryObjectList.isEmpty()) {
+            itemToStorage.forEach((integer, integer2) -> {
+                ((MInventoryStorage) mInventoryObjectList.stream()
+                        .filter(mInventoryObject -> mInventoryObject.getId() == integer)
+                        .collect(Collectors.toList())
+                        .get(0)).addObjectById(integer2);
+            });
+        }
+
         return mInventoryObjectList;
     }
 
@@ -161,7 +175,7 @@ public class MInventoryController {
             } else {
                 // Get all folders from a path as list (user home)
                 decomposedPath = decomposePath(Paths.get(System.getProperty("user.home")), false);
-                decomposedPath.add("MInventory");
+                decomposedPath.add(DATA_FOLDER_NAME);
 
                 pathAsList = decomposedPath;
                 // Compose strings to path and return it
@@ -212,6 +226,10 @@ public class MInventoryController {
     private String composePath(List<String> list, String additionalFileName){
         StringBuffer sb = new StringBuffer();
 
+        String osName = System.getProperty("os.name");
+        osName.toLowerCase();
+        if (osName.contains("mac")) sb.append(File.separatorChar);
+
         for (String folderName : list) {
             sb.append(folderName);
             sb.append(File.separatorChar);
@@ -232,9 +250,9 @@ public class MInventoryController {
 
         int id = Integer.parseInt(arguments[csv.OBJECT_ID]);
 
-        if ( Integer.parseInt(arguments[csv.CONTAINER_ID]) != -1) {
+        /*if ( Integer.parseInt(arguments[csv.CONTAINER_ID]) != -1) {
             itemToStorage.put(id, Integer.parseInt(arguments[csv.OBJECT_ID]));
-        }
+        }*/
         String name;
             try {
                 name = arguments[csv.NAME];
@@ -262,17 +280,62 @@ public class MInventoryController {
                 System.out.println(ipe.getMessage() + "\n" + ipe.getStackTrace());
                 image = null;
             }
+        Color color;
+            try {
+                String[] rgbaText = arguments[csv.COLOR].split(":");
+                double red = Double.parseDouble(rgbaText[0]);
+                double green = Double.parseDouble(rgbaText[1]);
+                double blue = Double.parseDouble(rgbaText[2]);
+                double opacity = Double.parseDouble(rgbaText[3]);
+                color = new Color(red, green, blue, opacity);
+            } catch (NumberFormatException nfe) {
+                System.out.println(nfe.getMessage() + "\n" + nfe.getStackTrace());
+                color = Color.WHITESMOKE;
+            }
+        double[] dimensions = new double[3];
+        try {
+                String[] dimsText = arguments[csv.DIMENSIONS].split(":");
+                dimensions[0] = Double.parseDouble(dimsText[0]);
+                dimensions[1] = Double.parseDouble(dimsText[1]);
+                dimensions[2] = Double.parseDouble(dimsText[2]);
+            } catch (NumberFormatException nfe) {
+                System.out.println(nfe.getMessage() + "\n" + nfe.getStackTrace());
+                dimensions[0] = 0;
+                dimensions[1] = 0;
+                dimensions[2] = 0;
+            }
+        Type type;
+            type = new Type(arguments[csv.TYPE], arguments[csv.USAGE_TYPE]);
+        int stateOfDecay;
+            try {
+                stateOfDecay = Integer.parseInt(arguments[csv.STATE_OF_DECAY]);
+            } catch (NumberFormatException nfe) {
+                System.out.println(nfe.getMessage() + "\n" + nfe.getStackTrace());
+                stateOfDecay = 1;
+            }
+        double weight;
+            try {
+                weight = Double.parseDouble(arguments[csv.WEIGHT]);
+            } catch (NumberFormatException nfe) {
+                System.out.println(nfe.getMessage() + "\n" + nfe.getStackTrace());
+                weight = 1;
+            }
+        String distinctAttribute;
+            distinctAttribute = arguments[csv.DISTINCT_ATTRIBUTE];
 
-        // Dummy data
-        double[] dims = {0, 0, 0};
-        Type type = new Type("", "");
+        try {
+            if (Integer.parseInt(arguments[csv.CONTAINER_ID]) > 0)
+                itemToStorage.put(Integer.parseInt(arguments[csv.CONTAINER_ID]), id);
+        } catch (NumberFormatException nfe) {
+            System.out.println(nfe.getMessage() + "\n" + nfe.getStackTrace());
+        }
+
 
         if(arguments[csv.IDENTIFIER].equals(dataModel.STORAGE_IDENTIFIER)) {
-            return new MInventoryStorage(id, name, description, image , 0, Color.WHITESMOKE, dims, 0, type, "");
-        } else {
-            //TODO: Add item to storage if storageId exists
 
-            return new MInventoryItem(id, name, description, image, 0, Color.WHITESMOKE, dims, 0, type, "");
+            return new MInventoryStorage(id, name, description, image , weight, color, dimensions, stateOfDecay, type, distinctAttribute);
+        } else {
+            return new MInventoryItem(id, name, description, image, weight, color, dimensions, stateOfDecay, type, distinctAttribute);
         }
     }
 }

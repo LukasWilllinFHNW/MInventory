@@ -26,6 +26,8 @@ public class Overlay extends Stage implements ViewTemplate {
 
     Button backButton;
 
+    boolean isFirstLevel;
+
 
     // --- CONSTRUCTORS ---
     public Overlay(MInventoryPresentationModel presModel, MInventoryDataModel dataModel, double height, double width){
@@ -46,10 +48,12 @@ public class Overlay extends Stage implements ViewTemplate {
         HBox box = new HBox();
             box.getChildren().add(backButton);
             box.setPadding(new Insets(5));
+            box.setMaxHeight(25);
         addNode(box);
 
-        this.open();
+        setIsFirstLevel();
 
+        this.open();
     }
 
 
@@ -59,19 +63,31 @@ public class Overlay extends Stage implements ViewTemplate {
     }
 
     public void close() {
-        presModel.useEditorStyle();
+        if (isFirstLevel)
+            presModel.useEditorStyle();
         super.close();
     }
 
     public void open() {
-        presModel.useCreationStyle();
+        if (isFirstLevel)
+            presModel.useCreationStyle();
         super.show();
     }
+
+    public void setIsFirstLevel() {
+        isFirstLevel = true;
+    }
+    public void setIsLowerLevel() {
+        isFirstLevel = false;
+    }
+
+    public boolean isFirstlevel() { return isFirstLevel; }
 
 
     // --- UI INIT ---
     @Override
     public void initializeControls() {
+
         backButton = new Button("<-");
     }
 
@@ -79,12 +95,9 @@ public class Overlay extends Stage implements ViewTemplate {
     public void initializeLayout() {
 
         container = new VBox();
-            //container.setFillWidth(true);
-            //container.autosize();
 
         stackPane = new StackPane(container);
             stackPane.setAlignment(Pos.TOP_CENTER);
-            //stackPane.autosize();
     }
 
     @Override

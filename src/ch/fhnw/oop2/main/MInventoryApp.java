@@ -1,14 +1,20 @@
 package ch.fhnw.oop2.main;
 
-import ch.fhnw.oop2.control.MInventoryController;
+import ch.fhnw.oop2.control.MInventoryFilesController;
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import ch.fhnw.oop2.gui.MInventoryUI;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.Paths;
+import java.util.Calendar;
 
 // TODO: What is Stage?
 //
@@ -20,10 +26,10 @@ public class MInventoryApp extends Application{
 
     private MInventoryPresentationModel presModel;
     private MInventoryDataModel dataModel;
-    private MInventoryController mInventoryController;
+    private MInventoryFilesController mInventoryFilesController;
 
     private int startHeight = 565;
-    private int startWidth = 820;
+    private int startWidth = 900;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -32,9 +38,9 @@ public class MInventoryApp extends Application{
 
         dataModel = new MInventoryDataModel();
         presModel = new MInventoryPresentationModel();
-        mInventoryController = new MInventoryController(dataModel);
-        dataModel.setMInventoryObjectListProperty(mInventoryController.readObjectsFromFile());
-        dataModel.setMInventoryController(mInventoryController);
+        mInventoryFilesController = new MInventoryFilesController(dataModel);
+        dataModel.setMInventoryObjectListProperty(mInventoryFilesController.readObjectsFromFile());
+        dataModel.setMInventoryController(mInventoryFilesController);
 
         // -- setup the main UI --
         Parent rootPanel = new MInventoryUI(presModel, dataModel);
@@ -71,13 +77,14 @@ public class MInventoryApp extends Application{
             presModel.getWidthProperty().setValue(newValue);
         });
 
-        // TODO: remove when saving and loading app settings
         primaryStage.centerOnScreen();
 
         primaryStage.show();
 
+        // Set no filter
         dataModel.noFilter(dataModel.getMInventoryObjectList(), dataModel.getMInventoryObjectListProxy());
-        if (!dataModel.getMInventoryObjectList().isEmpty()) dataModel.updateSelection(dataModel.getMInventoryObjectList().get(0).getId());
+        // Select the first object
+        if (!dataModel.getMInventoryObjectList().isEmpty()) dataModel.updateSelection(dataModel.getMInventoryObjectList().get(0));
     }
 
     public static void main(String[] args) {

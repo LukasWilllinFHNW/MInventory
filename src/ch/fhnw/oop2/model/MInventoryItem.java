@@ -32,6 +32,6 @@ public class MInventoryItem extends MInventoryObject {
     public static MInventoryObject emptyObject() {
         double[] dims = {0, 0, 0};
         Type type = new Type("", "");
-        return new MInventoryItem(-1, "", "", null, 0, Color.WHITESMOKE, dims, 0, type, "");
+        return new MInventoryItem(-1, "", "", null, 0, Color.WHITESMOKE, dims, 1, type, "");
     }
 }

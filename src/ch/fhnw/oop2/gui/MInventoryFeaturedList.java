@@ -161,9 +161,9 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
             });
             filterByStorage.setOnMouseClicked(event -> {
                 dataModel.filterByStorage(dataModel.getMInventoryObjectList(), dataModel.getMInventoryObjectListProxy());
-                filterByStorage.setGraphic(new ImageView(new CustomImage(
+                /*filterByStorage.setGraphic(new ImageView(new CustomImage(
                         new File(presModel.getIcon("link70.png")).toURI().toString(),
-                        presModel.getIcon("link70.png"))));
+                        presModel.getIcon("link70.png"))));*/
                 filterByStorage.setContentDisplay(ContentDisplay.LEFT);
                 noFilter.setGraphic(null);
                 filterByItem.setGraphic(null);
@@ -171,9 +171,9 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
             });
             filterByItem.setOnMouseClicked(event -> {
                 dataModel.filterByItem(dataModel.getMInventoryObjectList(), dataModel.getMInventoryObjectListProxy());
-                filterByItem.setGraphic(new ImageView(new CustomImage(
+                /*filterByItem.setGraphic(new ImageView(new CustomImage(
                         new File(presModel.getIcon("link70.png")).toURI().toString(),
-                        presModel.getIcon("link70.png"))));
+                        presModel.getIcon("link70.png"))));*/
                 filterByStorage.setContentDisplay(ContentDisplay.LEFT);
                 filterByStorage.setGraphic(null);
                 noFilter.setGraphic(null);

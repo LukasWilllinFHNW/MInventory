@@ -62,6 +62,14 @@ public abstract class MInventoryObject {
         this.name = new SimpleStringProperty(object.getName());
         this.description = new SimpleStringProperty(object.getDescription());
         this.imageProperty.setValue(object.getImage());
+        this.weight.setValue(object.getWeight());
+        this.color.setValue(object.getColor());
+        this.dimensions[0] = new SimpleDoubleProperty(object.getLength());
+        this.dimensions[1] = new SimpleDoubleProperty(object.getHeight());
+        this.dimensions[2] = new SimpleDoubleProperty(object.getDepth());
+        this.stateOfDecay.setValue(object.getStateOfDecay());
+        this.type = new Type(object.getType().getType(), object.getType().getUsageType());
+        this.distinctAttribute.setValue(object.getDistinctAttribute());
     }
 
 
@@ -128,6 +136,9 @@ public abstract class MInventoryObject {
     public double[] getDimensions() {
         double[] dims = {dimensions[0].get(), dimensions[1].get(), dimensions[2].get()};
         return dims; }
+    public double getLength() { return this.getLengthProperty().doubleValue(); }
+    public double getHeight() { return this.getHeightProperty().doubleValue(); }
+    public double getDepth() { return this.getDepthProperty().doubleValue(); }
     public int getStateOfDecay() { return stateOfDecay.get(); }
     public Type getType() { return type; }
     public String getDistinctAttribute() { return distinctAttribute.get(); }

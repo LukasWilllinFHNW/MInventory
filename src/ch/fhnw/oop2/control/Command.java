@@ -8,4 +8,8 @@ public interface Command {
     void undo();
 
     void redo();
+
+    public void updateUndo(Object oldValue);
+
+    public void updateRedo(Object newValue);
 }

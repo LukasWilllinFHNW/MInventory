@@ -1,28 +1,53 @@
 package ch.fhnw.oop2.control;
 
+import ch.fhnw.oop2.model.MInventoryDataModel;
+import ch.fhnw.oop2.model.MInventoryItem;
+import ch.fhnw.oop2.model.MInventoryObject;
+import ch.fhnw.oop2.model.MInventoryObjectProxy;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * Class created by Lukas Willin on 03.01.2016.
  * @author Dieter Holz
- *
+ */
 public class RemoveCommand implements Command {
-    private final EuropePM  europe;
-    private final CountryPM removed;
-    private final int       position;
+    private final MInventoryDataModel dataModel;
+    private final MInventoryObject removed;
+    private final int position;
 
-    public RemoveCommand(EuropePM europe, CountryPM removed, int position) {
-        this.europe = europe;
+    public RemoveCommand(MInventoryDataModel dataModel, MInventoryObject removed, int position) {
+        this.dataModel = dataModel;
         this.removed = removed;
         this.position = position;
     }
 
     @Override
     public void undo() {
-        europe.allCountries().add(position, removed);
-        europe.setSelectedCountryId(removed.getId());
+        dataModel.addToList(position, removed);
     }
 
     @Override
     public void redo() {
-        europe.removeFromList(removed);
+        dataModel.delete(removed);
     }
-}*/
+
+    /**
+     * Not supportet function throws NotImplementedException
+     * @param oldValue can not be set
+     * @throws NotImplementedException
+     */
+    @Override
+    public void updateUndo(Object oldValue) {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * Not supportet function throws NotImplementedException
+     * @param newValue can not be set
+     * @throws NotImplementedException
+     */
+    @Override
+    public void updateRedo(Object newValue) {
+        throw new NotImplementedException();
+    }
+}

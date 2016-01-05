@@ -5,12 +5,20 @@ import ch.fhnw.oop2.model.MInventoryPresentationModel;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.Label;
+import javafx.scene.layout.*;
 
 /**
  * Created by Lukas on 01.12.2015.
  */
-public class MInventoryTopBarView extends HBox implements ViewTemplate{
+public class MInventoryTopBarView extends GridPane implements ViewTemplate{
+
+    HBox hBoxAddDeleteSave;
+    HBox hBoxUndoRedo;
+    HBox hBoxSettings;
+
+    private ColumnConstraints cc; int ccAmount;
+    private RowConstraints rc; int rcAmount;
 
     private final MInventoryPresentationModel presModel;
     private final MInventoryDataModel dataModel;
@@ -18,6 +26,9 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
     private Button addButton;
     private Button deleteButton;
     private Button saveButton;
+
+    private Button undoButton;
+    private Button redoButton;
 
     private Button createButton;
     private Button cancelButton;
@@ -33,34 +44,59 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
         this.presModel = presModel;
         this.dataModel = dataModel;
 
+        cc = new ColumnConstraints(); ccAmount = 3;
+            cc.setPercentWidth((100/ccAmount));
+            cc.setHgrow(Priority.ALWAYS);
+        rc = new RowConstraints(); rcAmount = 1;
+            rc.setPercentHeight((100/rcAmount));
+            rc.setVgrow(Priority.ALWAYS);
+
         initSequence();
     }
 
     @Override
     public void initializeLayout() {
-        this.setSpacing(5);
+        for (int i = 0; i < ccAmount; ++i) this.getColumnConstraints().add(cc);
+        for (int i = 0; i < rcAmount; ++i) this.getRowConstraints().add(rc);
+
+        hBoxAddDeleteSave = new HBox();
+            hBoxAddDeleteSave.setSpacing(6);
+            hBoxAddDeleteSave.setAlignment(Pos.CENTER_LEFT);
+        hBoxUndoRedo = new HBox();
+            hBoxUndoRedo.setSpacing(6);
+            hBoxUndoRedo.setAlignment(Pos.CENTER);
+        hBoxSettings = new HBox();
+            hBoxSettings.setSpacing(6);
+            hBoxSettings.setAlignment(Pos.CENTER_RIGHT);
     }
 
     @Override
     public void layoutPanes() {
-
+        this.add(hBoxAddDeleteSave, 0, 0);
+        this.add(hBoxUndoRedo, 1, 0);
     }
 
     @Override
     public void initializeControls() {
 
-        this.addButton = presModel.createButton("+");
+        addButton = presModel.createButton("+");
             addButton.disableProperty().bind(presModel.getAddDisabledProperty());
-        this.deleteButton = presModel.createButton("-");
+        deleteButton = presModel.createButton("-");
             deleteButton.disableProperty().bind(presModel.getAddDisabledProperty());
-        this.saveButton = presModel.createButton("save");
+        saveButton = presModel.createButton("save");
             saveButton.disableProperty().bind(presModel.getAddDisabledProperty());
+
+        undoButton = presModel.createButton("undo");
+            undoButton.disableProperty().bind(presModel.getAddDisabledProperty());
+        redoButton = presModel.createButton("redo");
+            redoButton.disableProperty().bind(presModel.getAddDisabledProperty());
     }
 
     @Override
     public void layoutControls() {
 
-        this.getChildren().addAll(addButton, deleteButton, saveButton);
+        hBoxAddDeleteSave.getChildren().addAll(addButton, deleteButton, saveButton);
+        hBoxUndoRedo.getChildren().addAll(undoButton, redoButton);
     }
 
     @Override
@@ -71,10 +107,17 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
         });
 
         this.deleteButton.setOnMouseClicked(event -> {
-            dataModel.delete(); });
+            dataModel.delete(null); });
 
         this.saveButton.setOnMouseClicked(event -> {
             dataModel.save(); });
+
+        this.undoButton.setOnMouseClicked(event -> {
+            dataModel.undo();
+        });
+        this.redoButton.setOnMouseClicked(event -> {
+            dataModel.redo();
+        });
     }
 
     @Override
@@ -101,11 +144,11 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
             //askIfStorage.setPadding(new Insets(3, 6, 6, 6));
 
         this.askIfItem.setOnMouseClicked(event -> {
-            dataModel.addNewObject('i');
+            dataModel.prepareNewObject('i');
             createInputDialog();
         });
         this.askIfStorage.setOnMouseClicked(event -> {
-            dataModel.addNewObject('s');
+            dataModel.prepareNewObject('s');
             createInputDialog();
         });
 
@@ -120,15 +163,31 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
 
         overlay.close();
 
+        MInventoryDetailedView detailedView = new MInventoryDetailedView(presModel, dataModel);
+
         this.createButton = new Button("create");
         createButton.disableProperty().bind(presModel.getSaveDisabledProperty());
         this.cancelButton = new Button("cancel");
         cancelButton.disableProperty().bind(presModel.getSaveDisabledProperty());
 
         this.createButton.setOnMouseClicked(event -> {
-            presModel.useEditorStyle();
-            overlay.close();
-            dataModel.createNewObject();
+            if (detailedView.hasSufficientInfo()) {
+                presModel.useEditorStyle();
+                overlay.close();
+                dataModel.createNewObject();
+            } else {
+                Overlay reminder = new Overlay(presModel, dataModel, 230, 300);
+                reminder.addNode(new Label("Please name your creation."));
+                reminder.setIsLowerLevel();
+                Button closeReminder = presModel.createButton("ok");
+                HBox reminderHbox = new HBox();
+                    reminderHbox.setPadding(new Insets(6));
+                    reminderHbox.setAlignment(Pos.CENTER_RIGHT);
+                    reminderHbox.setMaxHeight(30);
+                    reminderHbox.getChildren().add(closeReminder);
+                closeReminder.setOnMouseClicked(event1 -> reminder.close());
+                reminder.addNode(reminderHbox);
+            }
         });
         this.cancelButton.setOnMouseClicked(event -> {
             presModel.useEditorStyle();
@@ -138,11 +197,15 @@ public class MInventoryTopBarView extends HBox implements ViewTemplate{
 
         HBox box = new HBox();
             box.getChildren().addAll(createButton, cancelButton);
-            box.setAlignment(Pos.CENTER);
+            box.setAlignment(Pos.CENTER_RIGHT);
+            box.setSpacing(6);
+            box.setPadding(new Insets(6));
+            box.setMaxHeight(30);
 
         overlay = new Overlay(presModel, dataModel, 600, 600);
         presModel.useCreationStyle();
+        overlay.addNode(detailedView);
         overlay.addNode(box);
-        overlay.addNode(new MInventoryDetailedView(presModel, dataModel));
+
     }
 }

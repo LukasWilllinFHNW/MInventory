@@ -1,11 +1,10 @@
 #MInventoryUI {
 	-fx-background-color: rgba(255, 255, 255, 1);
-	-fx-padding: 5;
 }
 
-/*#PreviewView {
-    -fx-background-color: rgba(20, 20, 20, 1);
-}*/
+#PreviewView {
+    -fx-background-color: darkslategray;
+}
 
 #borderlessPane {
 	-fx-background-color: transparent;
@@ -55,7 +54,7 @@
 	-fx-border-color: darkslategrey;
 }
 #styledButton:focused {
-	-fx-background-color: whitesmoke;
+	-fx-background-color: lightblue;
 	-fx-border-color: darkslategrey;
 }
 
@@ -80,4 +79,8 @@
 .slider {
 	-fx-background-color: transparent;
 	-fx-border-color: transparent;
+}
+
+#immersiveLabel {
+	-fx-text-fill: #EEEEEE;
 }

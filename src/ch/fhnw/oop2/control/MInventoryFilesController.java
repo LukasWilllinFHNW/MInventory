@@ -1,11 +1,23 @@
 package ch.fhnw.oop2.control;
 
 import ch.fhnw.oop2.gui.CustomImage;
+import ch.fhnw.oop2.gui.ViewTemplate;
 import ch.fhnw.oop2.model.*;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 //com.sun.org.apache.xpath.internal.operations.String TODO: Whot iis thiis?
 import java.io.BufferedWriter;
@@ -21,7 +33,7 @@ import java.util.stream.Stream;
 /**
  * Created by Lukas on 01.12.2015.
  */
-public class MInventoryController {
+public class MInventoryFilesController {
 
     private final CSVFileDefinition csv = new CSVFileDefinition();
 
@@ -54,7 +66,7 @@ public class MInventoryController {
 
 
     // --- CONSTRUCTORs ---
-    public MInventoryController(MInventoryDataModel dataModel) {
+    public MInventoryFilesController(MInventoryDataModel dataModel) {
         this.dataModel = dataModel;
     }
 
@@ -65,7 +77,6 @@ public class MInventoryController {
      * @return List with storage- and item-objects
      */
     public SimpleListProperty<MInventoryObject> readObjectsFromFile() {
-
         List<MInventoryObject> objectList;
         try {
             objectList = getStreamOfLines(CSV_FILE_NAME)
@@ -93,7 +104,6 @@ public class MInventoryController {
                         .get(0)).addObjectById(integer2);
             });
         }
-
         return mInventoryObjectList;
     }
 

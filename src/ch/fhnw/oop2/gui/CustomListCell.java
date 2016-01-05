@@ -24,6 +24,7 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
 
     ChangeListener<String> nameChangeListener;
     ChangeListener<Image> imageChangeListener;
+    ChangeListener<Color> colorChangeListener;
 
     MInventoryPresentationModel presModel;
     MInventoryDataModel dataModel;
@@ -44,6 +45,7 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
         if (super.getItem() != null && nameChangeListener != null) {
             getItem().getNameProperty().removeListener(nameChangeListener);
             getItem().getImageProperty().removeListener(imageChangeListener);
+            getItem().getColorProperty().removeListener(colorChangeListener);
         }
 
         super.updateItem(mInventoryObject, empty);
@@ -55,149 +57,48 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
                 setText(newValue); };
             imageChangeListener = (observable, oldValue, newValue) -> {
                 updateGraphic(); };
+            colorChangeListener = (observable, oldValue, newValue) -> {
+                if (getItem().getColor() == null)
+                    super.setGraphic(new Circle(10, 10, 20, getItem().getColor())); };
             updateGraphic();
             setText(getItem().getName());
             getItem().getNameProperty().addListener(nameChangeListener);
             getItem().getImageProperty().addListener(imageChangeListener);
+            getItem().getColorProperty().addListener(colorChangeListener);
         }
     }
 
     private void addEvents() {
-        /*this.setOnMouseClicked( (MouseEvent event) -> {
-            if (this.getItem() != null) dataModel.updateSelection(this.getItem().getId()); });*/
-        this.setOnDragDropped( event -> {
-            if (super.getItem() instanceof MInventoryStorage &&(MInventoryObject)event.getAcceptingObject() != null) {
-                //try {
-                    ((MInventoryStorage) super.getItem()).addObjectById((((MInventoryObject) event.getAcceptingObject()).getId()));
-                /*} catch (MInventoryException e) {
-
-                }*/
-            };
-        });
     }
 
     private void addListeners() {
 
         super.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue && super.getItem() != null) {
-                dataModel.updateSelection(super.getItem().getId());
+            if (newValue) {
+                dataModel.updateSelection(super.getItem());
             } });
     }
 
     private void updateGraphic(){
         if (getItem() != null) {
-            ImageView cImageView = new CustomImageView(presModel, dataModel);
-            ImageViewPane imageViewPane;
+            if (getItem().getImage() != null) {
+                ImageView cImageView = new CustomImageView(presModel, dataModel);
+                ImageViewPane imageViewPane;
                 cImageView.setImage(getItem().getImage());
                 cImageView.setPreserveRatio(false);
                 cImageView.setFitHeight(42);
                 cImageView.setFitWidth(42);
-            imageViewPane = new ImageViewPane(cImageView);
+                imageViewPane = new ImageViewPane(cImageView);
                 imageViewPane.setMaxHeight(42);
                 imageViewPane.setPrefSize(42, 42);
                 imageViewPane.setMaxWidth(42);
                 cImageView.setClip(new Circle(cImageView.getFitHeight() / 2 - 1, cImageView.getFitWidth() / 2 - 1, 20));
-            super.setGraphic(imageViewPane);
+                super.setGraphic(imageViewPane);
+            } else {
+                super.setGraphic(new Circle(10, 10, 20, getItem().getColor()));
+            }
         } else {
-            ImageView cImageView = new CustomImageView(presModel, dataModel);
-            ImageViewPane imageViewPane;
-                setStyle("-fx-background-color: whitesmoke;");
-                cImageView.setPreserveRatio(false);
-                cImageView.setFitHeight(42);
-                cImageView.setFitWidth(42);
-            imageViewPane = new ImageViewPane(cImageView);
-                imageViewPane.setMaxHeight(42);
-                imageViewPane.setPrefSize(42, 42);
-                imageViewPane.setMaxWidth(42);
-                cImageView.setClip(new Circle(cImageView.getFitHeight() / 2 - 1, cImageView.getFitWidth() / 2 - 1, 20));
-            super.setGraphic(imageViewPane);
+            super.setGraphic(new Circle(10, 10, 20, Color.WHITESMOKE));
         }
-    }
-}
-
-class CustomGraphic extends Pane implements ViewTemplate{
-
-    Pane graphicPane;
-    GridPane grid;
-        ColumnConstraints ccContent;
-        ColumnConstraints ccGraphic;
-        RowConstraints rc;
-    HBox additionalContent;
-
-    Label name;
-    Label description;
-    Label color;
-
-
-    // --- CONSTRUCOTRS ---
-    public CustomGraphic() {
-        initSequence();
-    }
-
-
-    // -- init sequence --
-    @Override
-    public void initializeControls() {
-        name = new Label();
-        description = new Label();
-        color = new Label();
-    }
-
-    @Override
-    public void initializeLayout() {
-        double contentWidth = 75;
-        ccContent = new ColumnConstraints();
-            ccContent.setHgrow(Priority.ALWAYS);
-            ccContent.setPercentWidth(contentWidth);
-        ccGraphic = new ColumnConstraints();
-            ccGraphic.setHgrow(Priority.ALWAYS);
-            ccGraphic.setPercentWidth(100-contentWidth);
-        rc = new RowConstraints();
-            rc.setPercentHeight(50);
-            rc.setVgrow(Priority.ALWAYS);
-
-        grid =  new GridPane();
-            grid.getColumnConstraints().addAll(ccGraphic, ccContent);
-            grid.getRowConstraints().addAll(rc, rc);
-        graphicPane  = new Pane();
-            graphicPane.setPadding(new Insets(3));
-
-        additionalContent = new HBox();
-            additionalContent.setSpacing(3);
-    }
-
-    @Override
-    public void layoutPanes() {
-
-    }
-
-    @Override
-    public void layoutControls() {
-
-    }
-
-    @Override
-    public void addListeners() {
-
-    }
-
-    @Override
-    public void addBindings() {
-
-    }
-
-    @Override
-    public void addEvents() {
-
-    }
-
-    @Override
-    public void applyStylesheet() {
-
-    }
-
-    @Override
-    public void applySpecialStyles() {
-
     }
 }

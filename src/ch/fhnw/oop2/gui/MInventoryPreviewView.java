@@ -117,8 +117,8 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
 
     @Override
     public void layoutControls() {
-        storagePickerHBox.getChildren().addAll(new Label("Put into storage"), openStoragePickerButton);
-        contentViewHBox.getChildren().addAll(new Label("Look into"), openContentViewButton);
+        storagePickerHBox.getChildren().addAll(presModel.createImmersiveLabel("Put into storage"), openStoragePickerButton);
+        contentViewHBox.getChildren().addAll(presModel.createImmersiveLabel("Look into"), openContentViewButton);
     }
 
     @Override
@@ -126,16 +126,27 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
         dataModel.getProxy().getImageProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 backgroundImagePane.setBackground(new Background(new BackgroundImage(newValue, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT)));
-            } else {
-                Paint fill = dataModel.getProxy().getColor();
-                backgroundImagePane.setBackground(new Background(new BackgroundFill(fill, CornerRadii.EMPTY, Insets.EMPTY)));
             }
         });
         dataModel.getCurrentSelectedIdProperty().addListener((observable, oldValue, newValue) -> {
-            if ((dataModel.getById(newValue.intValue())) instanceof MInventoryStorage) {
-                gridPane.add(contentViewHBox, 0, 3, 3, 1);
-            } else {
-                gridPane.getChildren().remove(contentViewHBox);
+            if (newValue.intValue() != -1) {
+                MInventoryObject currentObject = (dataModel.getById(newValue.intValue()));
+                if (currentObject instanceof MInventoryStorage && !gridPane.getChildren().contains(contentViewHBox)) {
+                    gridPane.add(contentViewHBox, 0, 3, 3, 1);
+                } else {
+                    gridPane.getChildren().remove(contentViewHBox);
+                }
+            }
+        });
+        dataModel.getProxy().getColorProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                if(backgroundImagePane.getBackground().getImages().isEmpty()) {
+                    Paint fill = newValue;
+                    backgroundImagePane.setBackground(new Background(new BackgroundFill(fill, CornerRadii.EMPTY, Insets.EMPTY)));
+                }
+            } catch(NullPointerException npe) {
+                Paint fill = newValue;
+                backgroundImagePane.setBackground(new Background(new BackgroundFill(fill, CornerRadii.EMPTY, Insets.EMPTY)));
             }
         });
     }
@@ -286,6 +297,7 @@ class StoragePicker implements ViewTemplate {
 
         storageList = new SimpleListProperty<>();
         dataModel.filterByStorage(dataModel.getMInventoryObjectList(), storageList);
+        storageList.remove(dataModel.getById(dataModel.getCurrentId()));
 
         initSequence();
     }

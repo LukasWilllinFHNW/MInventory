@@ -33,6 +33,7 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
         private RowConstraints rcPreview;
         private RowConstraints rcDetail;
         private ColumnConstraints cc;
+    private Pane backgroundMask;
 
 
     /** The PresentationModel for main UI */
@@ -75,7 +76,7 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
         splitPane = new SplitPane();
         // Right view in split pane
         gridPane = new GridPane();
-            gridPane.setMinWidth(400);
+            gridPane.setMinWidth(450);
             rcPreview = new RowConstraints();
                 rcPreview.setPercentHeight(35);
                 rcPreview.setVgrow(Priority.ALWAYS);
@@ -93,6 +94,7 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
             vBoxList.connectToModel();
             vBoxList.setMaxWidth(240);
         mInventoryDetailedView = new MInventoryDetailedView(presModel, dataModel);
+        backgroundMask = new Pane();
     }
 
     public void layoutPanes() {
@@ -116,6 +118,19 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
     public void addListeners(){
         splitPane.heightProperty().addListener((observable, oldValue, newValue) -> {
             vBoxList.setPrefHeight(newValue.doubleValue()); });
+        presModel.getAddDisabledProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue == true)
+                this.getChildren().add(backgroundMask);
+            else {
+                this.getChildren().remove(backgroundMask);
+            }
+        });
+        dataModel.getCurrentSelectedIdProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.intValue() == -1) {
+                gridPane.disableProperty().set(true);
+            }
+            if (newValue.intValue() > 0) gridPane.disableProperty().set(false);
+        });
     }
 
     @Override
@@ -136,6 +151,10 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
         bb.widthProperty().bind(blur);
         bb.heightProperty().bind(blur);
         bb.setIterations(5);
+
+        backgroundMask.setStyle("-fx-background-color: rgba(40, 40, 40, 0.3);");
+        mainPane.setStyle("-fx-padding: 6;");
+
 
         mainPane.setEffect(bb);
     }

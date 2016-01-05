@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 
 import java.io.File;
 
@@ -41,6 +42,12 @@ public class MInventoryPresentationModel {
 
 
     // --- API ---
+    public Label createImmersiveLabel(String text){
+        Label label = new Label(text);
+        label.setId("immersiveLabel");
+        return label;
+    }
+
     public Button createButton(String text) {
         Button button = new Button(text);
         button.setId("styledButton");
@@ -55,8 +62,8 @@ public class MInventoryPresentationModel {
 
     public String getIcon(String name) {
         StringBuffer path = new StringBuffer();
-        path.append(File.separatorChar + "src"
-                + File.separatorChar + "resources"
+        path.append(
+                File.separatorChar + "resources"
                 + File.separatorChar + "icons"
                 + File.separatorChar + "png" + File.separatorChar);
         path.append(name);

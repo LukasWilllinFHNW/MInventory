@@ -49,6 +49,8 @@ public class MInventoryDataModel {
 
     private final BooleanProperty undoDisabled = new SimpleBooleanProperty();
     private final BooleanProperty redoDisabled = new SimpleBooleanProperty();
+    private final BooleanProperty removeFromStorageDisabled = new SimpleBooleanProperty();
+    private final BooleanProperty lookIntoStorageDisabled = new SimpleBooleanProperty();
 
     private long lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
     private long waitTime = 1000;
@@ -71,6 +73,7 @@ public class MInventoryDataModel {
                     // Change occured -> reset the timer
                     lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
                 }
+            // The last logged time is too old
             } else {
                 redoStack.clear();
                 undoStack.add(0, new ValueChangeCommand(MInventoryDataModel.this, (Property) observable, oldValue, newValue));
@@ -103,6 +106,8 @@ public class MInventoryDataModel {
             if (oldSelection != null) {
                 unselect(oldSelection);
                 disableUndoSupport(oldSelection);
+                removeFromStorageDisabled.set(true);
+                lookIntoStorageDisabled.set(true);
             }
 
             if (newValue.intValue() != -1) {
@@ -111,6 +116,10 @@ public class MInventoryDataModel {
                 if (newSelection != null) {
                     select(newSelection);
                     enableUndoSupport(newSelection);
+                    removeFromStorageDisabled.set((getContainingStorage(newValue.intValue()) == null));
+                    lookIntoStorageDisabled.set(newSelection instanceof MInventoryItem);
+                    if (newSelection instanceof MInventoryStorage)
+                        lookIntoStorageDisabled.set(((MInventoryStorage)newSelection).getContainedObjectIds().isEmpty());
                 }
             }
         });
@@ -118,19 +127,7 @@ public class MInventoryDataModel {
     }
 
     // --- API ---
-
     // -- undo redo --
-    /*public void removeFromList(MInventoryObject object){
-        //TODO remove if implemented somewhere else
-        unselect(object.getId());
-        disableUndoSupport(object); // TODO disable undo support
-
-        mInventoryObjectList.remove(object);
-
-        if(!mInventoryObjectList.isEmpty()){
-            //setSelectedCountryId(allCountries.get(0).getId());
-        }
-    }*/
     public void undo() {
         if (undoStack.isEmpty()) {
             return;
@@ -139,7 +136,7 @@ public class MInventoryDataModel {
         undoStack.remove(0);
         redoStack.add(0, cmd);
 
-        cmd.undo(); // Fix stuck textfield properties
+        cmd.undo();
     }
 
     public void redo() {
@@ -163,6 +160,7 @@ public class MInventoryDataModel {
         property.addListener(propertyChangeListenerForUndoSupport);
     }
     private void disableUndoSupport(MInventoryObject object) {
+        // MAKE SURE ONLY ONE LISTENER PER OBJECT IS REMOVED
         object.getNameProperty().removeListener(propertyChangeListenerForUndoSupport);
         object.getDescriptionProperty().removeListener(propertyChangeListenerForUndoSupport);
         object.getColorProperty().removeListener(propertyChangeListenerForUndoSupport);
@@ -177,6 +175,7 @@ public class MInventoryDataModel {
         object.getStateOfDecayProperty().removeListener(propertyChangeListenerForUndoSupport);
     }
     private void enableUndoSupport(MInventoryObject object) {
+        // MAKE SURE ONLY ONE LISTENER PER PROPERTY IS ADDED
         object.getNameProperty().addListener(propertyChangeListenerForUndoSupport);
         object.getDescriptionProperty().addListener(propertyChangeListenerForUndoSupport);
         object.getColorProperty().addListener(propertyChangeListenerForUndoSupport);
@@ -194,7 +193,6 @@ public class MInventoryDataModel {
 
     // -- filter and search --
     public void noFilter(ListProperty<MInventoryObject> inList, ListProperty<MInventoryObject> toList) {
-
         toList.setValue(FXCollections.observableList(inList.stream()
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
@@ -218,7 +216,6 @@ public class MInventoryDataModel {
         newSearch.trim();
         String loweredNewSearch = newSearch.toLowerCase();
         if (newSearch.length() > oldSearch.length()) { //faster search in proxy list -> shrinking object amount
-
             toList.setValue(FXCollections.observableList(toList.stream()
                     .filter(object -> {
                         String containing = (object.searchInfo()).toLowerCase();
@@ -249,7 +246,7 @@ public class MInventoryDataModel {
     // -- selection handling --
 
     /**
-     *
+     * Update selected id
      * @param newObject beeing the object to select, null if no selection
      */
     public void updateSelection(MInventoryObject newObject){
@@ -258,11 +255,6 @@ public class MInventoryDataModel {
         } else {
             currentSelectedId.set(-1);
         }
-        /*int newID = newSelectedId;
-        int oldID = currentSelectedId.get();
-        // DO unbinding
-        this.unselect(oldID);
-        this.select(newID);*/
     }
 
     /**
@@ -463,31 +455,57 @@ public class MInventoryDataModel {
         updateSelection(getById(newID));
         undoStack.add(0, new AddCommand(MInventoryDataModel.this, getById(newID), 0));
     }
-
     public void addImage(CustomImage ci) {
         imagesToSave.put(currentSelectedId.get(), ci);
         proxy.getImageProperty().setValue(ci);
     }
-
     public void cancelNewObject() {
         unselect(getById(0));
         select(getById(currentSelectedId.get()));
+    }
+    // -- put --
+    public void putObjectIntoStorage(MInventoryStorage storage, MInventoryObject put) {
+        redoRemoveFromStorage(put);
+        storage.addObjectById(put.getId());
+        removeFromStorageDisabled.set(false);
+        undoStack.add(0, new AddToStorageCommand(MInventoryDataModel.this, put, storage));
+        lookIntoStorageDisabled.set(storage.getContainedObjectIds().isEmpty());
+    }
+    public void redoPutObjectIntoStorage(MInventoryStorage storage, MInventoryObject put) {
+        redoRemoveFromStorage(put);
+        storage.addObjectById(put.getId());
+        removeFromStorageDisabled.set(false);
+        lookIntoStorageDisabled.set(storage.getContainedObjectIds().isEmpty());
+    }
+    // -- remove --
+    public void removeFromStorage(MInventoryObject remove) {
+        MInventoryStorage storage = redoRemoveFromStorage(remove);
+        undoStack.add(0, new RemoveFromStorageCommand(MInventoryDataModel.this, storage,  remove));
+    }
+    public MInventoryStorage redoRemoveFromStorage(MInventoryObject remove) {
+        Integer containerId = getContainingStorage(remove.getId());
+        try {
+            if (containerId == null) {
+                throw new IllegalStateException("The storage containing ["
+                        + remove.getId() + " " + remove.getName() + "] could not be found");
+            }
+        } catch (IllegalStateException ise) {
+            System.out.println(ise);
+        }
+        if (containerId != null) {
+            MInventoryStorage storage = ((MInventoryStorage) getById(containerId));
+            storage.getContainedObjectIds().remove((Integer) remove.getId());
+            removeFromStorageDisabled.set(true);
+            lookIntoStorageDisabled.set(storage.getContainedObjectIds().isEmpty());
+            return storage;
+        } else return null;
     }
 
     public String infoAsLine(int objectId){
         MInventoryObject requestedObject = this.getById(objectId);
         StringBuffer info = new StringBuffer();
 
-        // Search for storage containing the requested object
-        List<Integer> list = mInventoryObjectList.stream()
-                .filter(object -> object instanceof MInventoryStorage )
-                .filter(object -> ((MInventoryStorage)object).getContainedObjectIds().contains(objectId))
-                .map(mInventoryObject -> mInventoryObject.getId() )
-                .collect(Collectors.toList());
-        Integer containerId = null;
-        if (!list.isEmpty()) {
-            containerId = list.get(0);
-        }
+        Integer containerId = getContainingStorage(objectId);
         // Write storage id into string
         if (containerId != null) {
             info.append(containerId.intValue() + ";");
@@ -505,6 +523,20 @@ public class MInventoryDataModel {
         info.append(requestedObject.infoAsLine());
 
         return info.toString();
+    }
+
+    public Integer getContainingStorage(int objectId){
+        // Search for storage containing the requested object
+        List<Integer> list = mInventoryObjectList.stream()
+                .filter(object -> object instanceof MInventoryStorage )
+                .filter(object -> ((MInventoryStorage)object).getContainedObjectIds().contains(objectId))
+                .map(mInventoryObject -> mInventoryObject.getId() )
+                .collect(Collectors.toList());
+        Integer containerId = null;
+        if (!list.isEmpty()) {
+            containerId = list.get(0);
+        }
+        return containerId;
     }
 
     public void copyImage(int id,CustomImage ci) {
@@ -539,6 +571,8 @@ public class MInventoryDataModel {
     }
     public SimpleListProperty<MInventoryObject> getMInventoryObjectListProxy() { return this.mInventoryObjectListProxy; }
     public IntegerProperty getCurrentSelectedIdProperty() { return currentSelectedId; }
+    public BooleanProperty getRemoveFromStorageDisabled() { return removeFromStorageDisabled; }
+    public BooleanProperty getLookIntoStorageDisabled() { return lookIntoStorageDisabled; }
 
 
     // --- SETTER ---

@@ -1,9 +1,6 @@
 package ch.fhnw.oop2.gui;
 
-import ch.fhnw.oop2.model.MInventoryDataModel;
-import ch.fhnw.oop2.model.MInventoryObject;
-import ch.fhnw.oop2.model.MInventoryPresentationModel;
-import ch.fhnw.oop2.model.MInventoryStorage;
+import ch.fhnw.oop2.model.*;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -11,7 +8,6 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.ImageView;
@@ -39,6 +35,7 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
     private VBox verticalBox;
     private HBox storagePickerHBox;
     private HBox contentViewHBox;
+    private HBox removeFromStorageHBox;
     private GridPane gridPane;
     private Pane backgroundImagePane;
     private Pane backgroundDarkenPane;
@@ -48,6 +45,7 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
 
     private Button openStoragePickerButton;
     private Button openContentViewButton;
+    private Button removeFromStorageButton;
 
 
     public MInventoryPreviewView(MInventoryPresentationModel presModel, MInventoryDataModel dataModel){
@@ -68,6 +66,17 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
 
 
     // --- API ---
+    private void updateColor(Color color) {
+        try {
+            if(dataModel.getProxy().getImage() == null) {
+                Paint fill = color;
+                backgroundImagePane.setBackground(new Background(new BackgroundFill(fill, CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+        } catch(NullPointerException npe) {
+            Paint fill = color;
+            backgroundImagePane.setBackground(new Background(new BackgroundFill(fill, CornerRadii.EMPTY, Insets.EMPTY)));
+        }
+    }
 
 
     // -- init sequence --
@@ -75,6 +84,7 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
     public void initializeControls() {
         openStoragePickerButton = presModel.createImmersiveButton("pick");
         openContentViewButton = presModel.createImmersiveButton("open");
+        removeFromStorageButton = presModel.createImmersiveButton("remove");
     }
 
     @Override
@@ -88,6 +98,9 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
         contentViewHBox = new HBox();
             contentViewHBox.setSpacing(6);
             contentViewHBox.setAlignment(Pos.CENTER_LEFT);
+        removeFromStorageHBox = new HBox();
+            removeFromStorageHBox.setSpacing(6);
+            removeFromStorageHBox.setAlignment(Pos.CENTER_LEFT);
 
         gridPane = new GridPane();
             gridPane.setAlignment(Pos.CENTER_RIGHT);
@@ -110,44 +123,55 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
         verticalBox.setVgrow(root, Priority.ALWAYS);
         verticalBox.setAlignment(Pos.CENTER);
         gridPane.add(verticalBox, 3, 0, 5, 5);
-        gridPane.add(storagePickerHBox, 0, 4, 3, 1);
+        gridPane.add(storagePickerHBox, 0, 3, 3, 1);
 
         this.getChildren().addAll(backgroundImagePane, backgroundDarkenPane, gridPane);
     }
 
     @Override
     public void layoutControls() {
+        removeFromStorageHBox.getChildren().addAll(presModel.createImmersiveLabel("Remove from storage"), removeFromStorageButton);
         storagePickerHBox.getChildren().addAll(presModel.createImmersiveLabel("Put into storage"), openStoragePickerButton);
         contentViewHBox.getChildren().addAll(presModel.createImmersiveLabel("Look into"), openContentViewButton);
     }
 
     @Override
     public void addListeners() {
+        // Update background image
         dataModel.getProxy().getImageProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                backgroundImagePane.setBackground(new Background(new BackgroundImage(newValue, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT)));
+                backgroundImagePane.setBackground(new Background(new BackgroundImage(newValue
+                        , BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT
+                        , BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT)));
             }
         });
+        // Add or remove "look into storage"-button when selected object is a storage
         dataModel.getCurrentSelectedIdProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.intValue() != -1) {
                 MInventoryObject currentObject = (dataModel.getById(newValue.intValue()));
-                if (currentObject instanceof MInventoryStorage && !gridPane.getChildren().contains(contentViewHBox)) {
-                    gridPane.add(contentViewHBox, 0, 3, 3, 1);
-                } else {
-                    gridPane.getChildren().remove(contentViewHBox);
-                }
+
+                updateColor(dataModel.getById(newValue.intValue()).getColor());
             }
         });
-        dataModel.getProxy().getColorProperty().addListener((observable, oldValue, newValue) -> {
-            try {
-                if(backgroundImagePane.getBackground().getImages().isEmpty()) {
-                    Paint fill = newValue;
-                    backgroundImagePane.setBackground(new Background(new BackgroundFill(fill, CornerRadii.EMPTY, Insets.EMPTY)));
-                }
-            } catch(NullPointerException npe) {
-                Paint fill = newValue;
-                backgroundImagePane.setBackground(new Background(new BackgroundFill(fill, CornerRadii.EMPTY, Insets.EMPTY)));
+        // Add or remove "remove from storage"-button on object is contained
+        dataModel.getRemoveFromStorageDisabled().addListener((observable1, oldValue1, newValue1) -> {
+            if (newValue1) {
+                gridPane.getChildren().remove(removeFromStorageHBox);
+            } else {
+                gridPane.add(removeFromStorageHBox, 0, 4, 3, 1);
             }
+        });
+        // Add or remove "look into storage"-button on contained object list is empty
+        dataModel.getLookIntoStorageDisabled().addListener((observable1, oldValue1, newValue1) -> {
+            if (newValue1) {
+                gridPane.getChildren().remove(contentViewHBox);
+            } else {
+                gridPane.add(contentViewHBox, 0, 2, 3, 1);
+            }
+        });
+        // Update color when no image is set
+        dataModel.getProxy().getColorProperty().addListener((observable, oldValue, newValue) -> {
+            updateColor(newValue);
         });
     }
 
@@ -157,12 +181,19 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
 
     @Override
     public void addEvents() {
+        // Opens the "put into storage" dialog
         openStoragePickerButton.setOnMouseClicked(event -> {
             StoragePicker storagePicker = new StoragePicker(presModel, dataModel);
             storagePicker.open(); });
+
+        // Opens the "look into storage"-button
         openContentViewButton.setOnMouseClicked(event -> {
             ContentView contentView = new ContentView(presModel, dataModel);
             contentView.open();
+        });
+
+        removeFromStorageButton.setOnMouseClicked(event -> {
+            dataModel.removeFromStorage(dataModel.getCurrentSelectedObject());
         });
     }
 
@@ -206,9 +237,8 @@ class ContentView implements ViewTemplate {
         contentList = new SimpleListProperty<>();
         if(dataModel.getProxy().getIdentifier() == 's') {
             MInventoryStorage storage = (MInventoryStorage) dataModel.getById(dataModel.getProxy().getId());
-            List<Integer> ids = (ArrayList)storage.getContainedObjectIds();
-            contentList.setValue(FXCollections
-                    .observableArrayList(ids.stream()
+            List<Integer> ids = storage.getContainedObjectIds();
+            contentList.setValue(FXCollections.observableArrayList(ids.stream()
                             .map(integer -> dataModel.getById(integer))
                             .collect(Collectors.toList())));
         }
@@ -226,6 +256,7 @@ class ContentView implements ViewTemplate {
         closeHBox = new HBox();
             closeHBox.setPadding(new Insets(6));
             closeHBox.setAlignment(Pos.BOTTOM_RIGHT);
+
         featuredList = new MInventoryFeaturedList(presModel, dataModel, false);
             featuredList.connectToListProperty(contentList);
     }
@@ -262,9 +293,9 @@ class ContentView implements ViewTemplate {
 
     public void open() {
         contentViewOverlay = new Overlay(presModel, dataModel, 650, 500);
-        contentViewOverlay.addNode(featuredList);
-        contentViewOverlay.addNode(closeHBox);
-        contentViewOverlay.open();
+            contentViewOverlay.addNode(featuredList);
+            contentViewOverlay.addNode(closeHBox);
+            contentViewOverlay.open();
     }
 }
 
@@ -319,6 +350,7 @@ class StoragePicker implements ViewTemplate {
 
     @Override
     public void layoutPanes() {
+
     }
 
     @Override
@@ -335,7 +367,8 @@ class StoragePicker implements ViewTemplate {
     public void addEvents() {
         accept.setOnMouseClicked(event -> {
             int id = featuredList.getCurrentSelectedObjectId();
-            ((MInventoryStorage)(dataModel.getById(id))).addObjectById(currentId);
+            dataModel.putObjectIntoStorage(((MInventoryStorage)dataModel.getById(id))
+                    , dataModel.getById(id));
             pickerOverlay.close(); });
 
         cancel.setOnMouseClicked(event -> {

@@ -58,13 +58,18 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
             imageChangeListener = (observable, oldValue, newValue) -> {
                 updateGraphic(); };
             colorChangeListener = (observable, oldValue, newValue) -> {
-                if (getItem().getColor() == null)
-                    super.setGraphic(new Circle(10, 10, 20, getItem().getColor())); };
-            updateGraphic();
-            setText(getItem().getName());
+                //Only show color if there is no image
+                if (getItem().getImage() == null)
+                    super.setGraphic(new Circle(10, 10, 20, getItem().getColor()));
+            };
+
             getItem().getNameProperty().addListener(nameChangeListener);
             getItem().getImageProperty().addListener(imageChangeListener);
             getItem().getColorProperty().addListener(colorChangeListener);
+
+            //Update on update item
+            updateGraphic();
+            setText(getItem().getName());
         }
     }
 

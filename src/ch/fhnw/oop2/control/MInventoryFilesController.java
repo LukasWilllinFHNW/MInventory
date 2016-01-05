@@ -65,8 +65,9 @@ public class MInventoryFilesController {
     private ArrayList<String> pathAsList;
 
 
-    // --- CONSTRUCTORs ---
+    // --- CONSTRUCTORS ---
     public MInventoryFilesController(MInventoryDataModel dataModel) {
+
         this.dataModel = dataModel;
     }
 
@@ -78,24 +79,31 @@ public class MInventoryFilesController {
      */
     public SimpleListProperty<MInventoryObject> readObjectsFromFile() {
         List<MInventoryObject> objectList;
+
+        // Try reading information from file
         try {
             objectList = getStreamOfLines(CSV_FILE_NAME)
                     .skip(1)
                     .map(s -> createMInventoryObject(s.split(";")))
                     .collect(Collectors.toList());
         } catch (NullPointerException npe) {
+            // Add sample objects when file does no exist
             objectList = new ArrayList<>();
             objectList.add(createMInventoryObject(SAMPLE_STORAGE.split(";")));
             objectList.add(createMInventoryObject(SAMPLE_ITEM.split(";")));
         } catch (IllegalStateException ise) {
+            // Add sample objects when file does not exist
             objectList = new ArrayList<>();
             objectList.add(createMInventoryObject(SAMPLE_STORAGE.split(";")));
             objectList.add(createMInventoryObject(SAMPLE_ITEM.split(";")));
         }
+
+        // Create observable list from available object list
         ObservableList<MInventoryObject> observableList = FXCollections.observableArrayList(objectList);
         mInventoryObjectList = new SimpleListProperty<>();
         mInventoryObjectList.setValue(observableList);
 
+        // When all objects have been created add objects into their storage
         if (!mInventoryObjectList.isEmpty()) {
             itemToStorage.forEach((integer, integer2) -> {
                 ((MInventoryStorage) mInventoryObjectList.stream()
@@ -104,13 +112,20 @@ public class MInventoryFilesController {
                         .get(0)).addObjectById(integer2);
             });
         }
+
         return mInventoryObjectList;
     }
 
+    /**
+     * Writes all object from data model to a csv file
+     *
+     */
     public void writeObjectsToFile() {
+        // Define Files and Folders needed for saving
         File save = new File(getPath(CSV_FILE_NAME, filesInSameFolder).toString());
         File path = new File(getPath(null, filesInSameFolder).toString());
         File images = new File(getPath(IMAGE_FOLDER_NAME, filesInSameFolder).toString());
+
         // Check for non existing folders and files
         if (!save.exists() || !path.exists() || !images.exists()) {
             try {
@@ -124,6 +139,7 @@ public class MInventoryFilesController {
                 System.out.println("Creating save file failed " + ioe.getMessage());
             }
         }
+        // Do the saving
         try (BufferedWriter writer = Files.newBufferedWriter(getPath(CSV_FILE_NAME, filesInSameFolder), StandardCharsets.UTF_8)) {
             writer.write(csv.FILE_HEADER);
             writer.newLine();
@@ -146,11 +162,15 @@ public class MInventoryFilesController {
     }
 
     /**
-     * Copies an image to save location with a new
-     * @param i image to be copied
-     * @param newFileName target folder and name
+     * Copies an image to save location with optional new
+     * @param image to be copied
+     * @param newFileName name of image
+     * @throws IllegalArgumentException when path is set instead of only a file name
      */
-    public void copyImage(CustomImage i, String newFileName) {
+    public void copyImage(CustomImage image, String newFileName) {
+        if (newFileName.contains(""+File.separatorChar)) {
+            throw new IllegalArgumentException("Path instead of new image name is not allowed");
+        }
         List<String> list = (List<String>) pathAsList.clone();
             list.add(IMAGE_FOLDER_NAME);
         String target = composePath(list, newFileName);
@@ -159,7 +179,7 @@ public class MInventoryFilesController {
                 StandardCopyOption.COPY_ATTRIBUTES
         };
         try {
-            Files.copy(Paths.get(i.getPath()), Paths.get(target), options);
+            Files.copy(Paths.get(image.getPath()), Paths.get(target), options);
         } catch (IOException ioe) {
             System.out.println(ioe.getMessage() + " " + ioe.toString() + ioe.getLocalizedMessage());
         }
@@ -174,16 +194,17 @@ public class MInventoryFilesController {
      * is System independent
      * @param fileName the file or folder name to append
      * @param locatedInSameFolder true if files should be saved in same folder, false if files should be saved in user.home folder
-     * @return
+     * @return returns the path to the save location in user.home variable
      */
     private Path getPath(String fileName, boolean locatedInSameFolder) {
         ArrayList<String> decomposedPath;
         Path p;
         try {
             if(locatedInSameFolder) {
+                // String path to file in same folder
                 return Paths.get(getClass().getResource(fileName).toURI());
             } else {
-                // Get all folders from a path as list (user home)
+                // Get all folders from any path as list (user home) and append save location
                 decomposedPath = decomposePath(Paths.get(System.getProperty("user.home")), false);
                 decomposedPath.add(DATA_FOLDER_NAME);
 
@@ -198,12 +219,14 @@ public class MInventoryFilesController {
 
     /**
      * Creates an array from a path containing the folders in order
+     * Crops the file name when contains file name true
      * @param path the path to be decomposed
+     * @param containsFileName if it contains a file name
      * @return a list with the folder name
      */
-    private ArrayList<String> decomposePath(Path path, boolean containsFile) {
+    private ArrayList<String> decomposePath(Path path, boolean containsFileName) {
         // Delete file name from folder path
-        if (containsFile) {
+        if (containsFileName) {
             path = path.getParent();
         }
         ArrayList<String> sList = new ArrayList<String>();

@@ -1,23 +1,18 @@
 package ch.fhnw.oop2.model;
 
 import ch.fhnw.oop2.gui.CustomImage;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.image.Image;
+import javafx.beans.property.SimpleListProperty;
 import javafx.scene.paint.Color;
 
-import java.security.InvalidParameterException;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Lukas W on 17.11.2015.
  */
 public class MInventoryStorage extends MInventoryObject {
 
-    private ObservableList<Integer> objectIds;
+    private ArrayList<Integer> objectIds;
 
     // --- CONSTRUCTORS ---
     /**
@@ -31,12 +26,12 @@ public class MInventoryStorage extends MInventoryObject {
                              int stateOfDecay, Type type, String distinctAttribute) {
 
         super(id, name, description, image, weight, color, dimensions, stateOfDecay, type, distinctAttribute);
-        this.objectIds = FXCollections.observableArrayList();
+        this.objectIds = new ArrayList<>();
     }
 
     public MInventoryStorage(int id, MInventoryObject object) {
         super(id, object);
-        this.objectIds = FXCollections.observableArrayList();
+        this.objectIds =  new ArrayList<>();
     }
 
     public static MInventoryObject emptyObject() {
@@ -52,13 +47,13 @@ public class MInventoryStorage extends MInventoryObject {
      * @param objectId the item or storage to put inside */
     public void addObjectById(int objectId){
         //TODO: Check that object fits inside this storage
-        this.objectIds.add(objectId);
+        objectIds.add(objectId);
     }
 
 
     // --- GETTER ---
     public List<Integer> getContainedObjectIds() {
-        return objectIds.stream().collect(Collectors.toList());
+        return objectIds;
     }
 
 

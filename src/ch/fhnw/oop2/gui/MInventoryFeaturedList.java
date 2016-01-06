@@ -3,8 +3,8 @@ package ch.fhnw.oop2.gui;
 import ch.fhnw.oop2.model.MInventoryDataModel;
 import ch.fhnw.oop2.model.MInventoryObject;
 import ch.fhnw.oop2.model.MInventoryPresentationModel;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -35,18 +35,21 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
 
     /** The origin list of filtered list should never be altered*/
     ListProperty<MInventoryObject> originList;
-    /** The filtered list should only be filtered*/
-    ListProperty<MInventoryObject> filteredList;
     /** The list that can be filtert and altered by search and list view is bound to */
     ListProperty<MInventoryObject> connectedList;
 
-    Button filterByStorage;
-    Button filterByItem;
-    Button noFilter;
+    private Button filterByStorage;
+    private Button filterByItem;
+    private Button noFilter;
 
-    TextField txtSearch;
+    private final IntegerProperty currentSelectedObjectId;
+    private ChangeListener reportSelectionToModel = (observable, oldValue, newValue) -> {
+        dataModel.updateSelection(dataModel.getById(((Integer)newValue).intValue()));
+    };
 
-    boolean withFilters;
+    private TextField txtSearch;
+
+    private final BooleanProperty withFilters;
 
     /**
      * A list with search feature and optional filter options
@@ -58,7 +61,10 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
         this.presModel = presModel;
         this.dataModel = dataModel;
 
-        this.withFilters = withFilters;
+        this.withFilters = new SimpleBooleanProperty();
+        this.withFilters.set(withFilters);
+
+        currentSelectedObjectId = new SimpleIntegerProperty();
 
         initSequence();
     }
@@ -68,9 +74,13 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
     public void connectToModel() {
         originList = dataModel.getMInventoryObjectList();
         connectedList = mInventoryListView.connectToModel();
+        currentSelectedObjectId.addListener(reportSelectionToModel);
+        this.disableProperty().bind(presModel.getAddDisabledProperty());
     }
 
     public void connectToListProperty(ListProperty<MInventoryObject> list) {
+        currentSelectedObjectId.removeListener(reportSelectionToModel);
+        originList = null;
         originList = new SimpleListProperty<>();
         originList.setValue(FXCollections.observableArrayList(list.stream()
                 .map(mInventoryObject -> dataModel.getById(mInventoryObject.getId()))
@@ -95,7 +105,7 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
     // -- init sequence --
     @Override
     public void initializeControls() {
-        if (withFilters) {
+        if (withFilters.get()) {
             filterByStorage = presModel.createButton("storages");
             filterByItem = presModel.createButton("items");
             noFilter = presModel.createButton("everything");
@@ -105,7 +115,7 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
 
     @Override
     public void initializeLayout() {
-        if (withFilters) {
+        if (withFilters.get()) {
             hBoxListOptions = new HBox();
             hBoxListOptions.setAlignment(Pos.CENTER);
             hBoxListOptions.setMaxHeight(30);
@@ -119,21 +129,20 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
         hBoxListSearch.setSpacing(5);
         pr = new Pane();
         mInventoryListView = new MInventoryListView(presModel, dataModel);
-
     }
 
     @Override
     public void layoutPanes() {
         pr.getChildren().add(mInventoryListView);
         pr.setPrefWidth(300);
-        if (withFilters)
+        if (withFilters.get())
             this.getChildren().add(hBoxListOptions);
         this.getChildren().addAll(hBoxListSearch, pr);
     }
 
     @Override
     public void layoutControls() {
-        if (withFilters)
+        if (withFilters.get())
             hBoxListOptions.getChildren().addAll(noFilter, filterByStorage, filterByItem);
         hBoxListSearch.getChildren().add(txtSearch);
     }
@@ -154,7 +163,7 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
 
     @Override
     public void addEvents() {
-        if (withFilters) {
+        if (withFilters.get()) {
             noFilter.setOnMouseClicked(event -> {
                 dataModel.noFilter(dataModel.getMInventoryObjectList(), dataModel.getMInventoryObjectListProxy());
                 updateOriginList(dataModel.getMInventoryObjectList());
@@ -180,5 +189,10 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
                 updateOriginList(dataModel.getMInventoryObjectListProxy());
             });
         }
+    }
+
+    @Override
+    public void addBindings() {
+        currentSelectedObjectId.bind(mInventoryListView.getCurrentSelectedIdProperty());
     }
 }

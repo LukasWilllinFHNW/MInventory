@@ -77,26 +77,20 @@ public class CustomListCell extends ListCell<MInventoryObject>	{
     }
 
     private void addListeners() {
-
-        super.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                dataModel.updateSelection(super.getItem());
-            } });
     }
 
     private void updateGraphic(){
         if (getItem() != null) {
             if (getItem().getImage() != null) {
                 ImageView cImageView = new CustomImageView(presModel, dataModel);
-                ImageViewPane imageViewPane;
-                cImageView.setImage(getItem().getImage());
-                cImageView.setPreserveRatio(false);
-                cImageView.setFitHeight(42);
-                cImageView.setFitWidth(42);
-                imageViewPane = new ImageViewPane(cImageView);
-                imageViewPane.setMaxHeight(42);
-                imageViewPane.setPrefSize(42, 42);
-                imageViewPane.setMaxWidth(42);
+                    cImageView.setImage(getItem().getImage());
+                    cImageView.setPreserveRatio(false);
+                    cImageView.setFitHeight(42);
+                    cImageView.setFitWidth(42);
+                ImageViewPane imageViewPane = new ImageViewPane(cImageView);
+                    imageViewPane.setMaxHeight(42);
+                    imageViewPane.setPrefSize(42, 42);
+                    imageViewPane.setMaxWidth(42);
                 cImageView.setClip(new Circle(cImageView.getFitHeight() / 2 - 1, cImageView.getFitWidth() / 2 - 1, 20));
                 super.setGraphic(imageViewPane);
             } else {

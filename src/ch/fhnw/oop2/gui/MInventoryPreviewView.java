@@ -15,7 +15,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,6 +75,10 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
             Paint fill = color;
             backgroundImagePane.setBackground(new Background(new BackgroundFill(fill, CornerRadii.EMPTY, Insets.EMPTY)));
         }
+    }
+
+    private void updateButton() {
+
     }
 
 
@@ -199,6 +202,7 @@ public class MInventoryPreviewView extends StackPane implements ViewTemplate{
 
     @Override
     public void applyStylesheet() {
+
         this.setId("PreviewView");
     }
 
@@ -232,7 +236,7 @@ class ContentView implements ViewTemplate {
         this.dataModel = dataModel;
         this.presModel = presModel;
 
-        currentId = dataModel.getCurrentId();
+        currentId = dataModel.getCurrentSelectedId();
 
         contentList = new SimpleListProperty<>();
         if(dataModel.getProxy().getIdentifier() == 's') {
@@ -317,18 +321,18 @@ class StoragePicker implements ViewTemplate {
 
     Overlay pickerOverlay;
 
-    int currentId;
+    private final int currentId;
 
 
     public StoragePicker(MInventoryPresentationModel presModel, MInventoryDataModel dataModel) {
         this.dataModel = dataModel;
         this.presModel = presModel;
 
-        currentId = dataModel.getCurrentId();
+        currentId = dataModel.getCurrentSelectedId();
 
         storageList = new SimpleListProperty<>();
         dataModel.filterByStorage(dataModel.getMInventoryObjectList(), storageList);
-        storageList.remove(dataModel.getById(dataModel.getCurrentId()));
+        storageList.remove(dataModel.getById(dataModel.getCurrentSelectedId()));
 
         initSequence();
     }
@@ -366,9 +370,9 @@ class StoragePicker implements ViewTemplate {
     @Override
     public void addEvents() {
         accept.setOnMouseClicked(event -> {
-            int id = featuredList.getCurrentSelectedObjectId();
-            dataModel.putObjectIntoStorage(((MInventoryStorage)dataModel.getById(id))
-                    , dataModel.getById(id));
+            int storageId = featuredList.getCurrentSelectedObjectId();
+            dataModel.putObjectIntoStorage(((MInventoryStorage)dataModel.getById(storageId))
+                    , dataModel.getById(currentId));
             pickerOverlay.close(); });
 
         cancel.setOnMouseClicked(event -> {

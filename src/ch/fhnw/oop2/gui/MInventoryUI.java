@@ -91,8 +91,8 @@ public class MInventoryUI extends StackPane implements ViewTemplate{
         // left list in split pane
         vBoxList = new MInventoryFeaturedList(presModel, dataModel, true);
             vBoxList.setMinWidth(240);
-            vBoxList.connectToModel();
             vBoxList.setMaxWidth(240);
+            vBoxList.connectToModel();
         mInventoryDetailedView = new MInventoryDetailedView(presModel, dataModel);
         backgroundMask = new Pane();
     }

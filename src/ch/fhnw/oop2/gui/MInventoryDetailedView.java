@@ -290,7 +290,12 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
 
     @Override
     public void addEvents() {
-
+        typePickerEditor.setOnMouseClicked(event -> {
+            typePickerEditor.setItems(dataModel.getAllTypes());
+        });
+        usageTypePickerEditor.setOnMouseClicked(event -> {
+            usageTypePickerEditor.setItems(dataModel.getAllUsageTypes());
+        });
     }
 
     public void applyStylesheet() {

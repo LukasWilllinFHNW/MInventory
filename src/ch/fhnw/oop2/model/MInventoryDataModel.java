@@ -53,7 +53,7 @@ public class MInventoryDataModel {
     private final BooleanProperty lookIntoStorageDisabled = new SimpleBooleanProperty();
 
     private long lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
-    private long waitTime = 1000;
+    private long waitTime = 800;
     private ObservableValue lastChangedProperty;
     private final ChangeListener<Object> propertyChangeListenerForUndoSupport = (observable, oldValue, newValue) -> {
         if (!undoStack.isEmpty()) {
@@ -106,8 +106,6 @@ public class MInventoryDataModel {
             if (oldSelection != null) {
                 unselect(oldSelection);
                 disableUndoSupport(oldSelection);
-                removeFromStorageDisabled.set(true);
-                lookIntoStorageDisabled.set(true);
             }
 
             if (newValue.intValue() != -1) {
@@ -122,6 +120,7 @@ public class MInventoryDataModel {
                         lookIntoStorageDisabled.set(((MInventoryStorage)newSelection).getContainedObjectIds().isEmpty());
                 }
             }
+            return;
         });
 
     }
@@ -427,6 +426,7 @@ public class MInventoryDataModel {
             updateSelection(object);
         }
     }
+
     /**
      * Creates a new object based on data stored in a temporary object
      * which is connected to the proxy
@@ -455,33 +455,40 @@ public class MInventoryDataModel {
         updateSelection(getById(newID));
         undoStack.add(0, new AddCommand(MInventoryDataModel.this, getById(newID), 0));
     }
+
     public void addImage(CustomImage ci) {
         imagesToSave.put(currentSelectedId.get(), ci);
         proxy.getImageProperty().setValue(ci);
     }
+
     public void cancelNewObject() {
         unselect(getById(0));
         select(getById(currentSelectedId.get()));
     }
+
     // -- put --
     public void putObjectIntoStorage(MInventoryStorage storage, MInventoryObject put) {
+        if (storage.getId() == put.getId()) {
+            throw new IllegalArgumentException("A storage can not be put into itself.");
+        }
         redoRemoveFromStorage(put);
         storage.addObjectById(put.getId());
         removeFromStorageDisabled.set(false);
         undoStack.add(0, new AddToStorageCommand(MInventoryDataModel.this, put, storage));
-        lookIntoStorageDisabled.set(storage.getContainedObjectIds().isEmpty());
     }
+
     public void redoPutObjectIntoStorage(MInventoryStorage storage, MInventoryObject put) {
         redoRemoveFromStorage(put);
         storage.addObjectById(put.getId());
         removeFromStorageDisabled.set(false);
-        lookIntoStorageDisabled.set(storage.getContainedObjectIds().isEmpty());
     }
+
     // -- remove --
     public void removeFromStorage(MInventoryObject remove) {
         MInventoryStorage storage = redoRemoveFromStorage(remove);
         undoStack.add(0, new RemoveFromStorageCommand(MInventoryDataModel.this, storage,  remove));
     }
+
     public MInventoryStorage redoRemoveFromStorage(MInventoryObject remove) {
         Integer containerId = getContainingStorage(remove.getId());
         try {
@@ -556,12 +563,42 @@ public class MInventoryDataModel {
                 .findAny();
         return object.isPresent() ? object.get() : null;
     }
-    public int getCurrentId() { return currentSelectedId.intValue(); }
+    public int getCurrentSelectedId() { return currentSelectedId.intValue(); }
     public MInventoryObjectProxy getProxy() {
         return this.proxy;
     }
     public MInventoryObject getCurrentSelectedObject() {
         return getById(currentSelectedId.intValue());
+    }
+    public ObservableList<String> getAllTypes() {
+        return FXCollections.observableArrayList(mInventoryObjectList.stream()
+                .filter(mInventoryObject1 -> {
+                    if (getCurrentSelectedObject() instanceof MInventoryStorage
+                        && mInventoryObject1 instanceof MInventoryStorage) {
+                            return true; }
+                    if (getCurrentSelectedObject() instanceof MInventoryItem
+                        && mInventoryObject1 instanceof MInventoryItem) {
+                            return true; }
+                    return false;
+                })
+                .map(mInventoryObject -> mInventoryObject.getType().getType())
+                .distinct()
+                .collect(Collectors.toList()));
+    }
+    public ObservableList<String> getAllUsageTypes() {
+        return FXCollections.observableArrayList(mInventoryObjectList.stream()
+                .filter(mInventoryObject1 -> {
+                    if (getCurrentSelectedObject() instanceof MInventoryStorage
+                            && mInventoryObject1 instanceof MInventoryStorage) {
+                        return true; }
+                    if (getCurrentSelectedObject() instanceof MInventoryItem
+                            && mInventoryObject1 instanceof MInventoryItem) {
+                        return true; }
+                    return false;
+                })
+                .map(mInventoryObject -> mInventoryObject.getType().getUsageType())
+                .distinct()
+                .collect(Collectors.toList()));
     }
 
 

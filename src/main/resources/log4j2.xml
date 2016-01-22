@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="trace">
+	<ThresholdFilter level="trace"/>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss} %-5level %line [%class{36}] - &lt;%msg&gt;%n" />
+        </Console>
+        <File name="File" fileName="log/log.txt" bufferedIO="true">
+            <PatternLayout pattern="%d{dd. MMM. yy, HH:mm:ss} %-5level &quot;%msg&quot;%n" />
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File" />
+        </Root>
+    </Loggers>
+</Configuration>

@@ -91,6 +91,7 @@ public class MInventoryTopBarView extends GridPane implements ViewTemplate{
 
         undoButton = presModel.createButton("undo");
             undoButton.disableProperty().bind(presModel.getAddDisabledProperty());
+            
         redoButton = presModel.createButton("redo");
             redoButton.disableProperty().bind(presModel.getAddDisabledProperty());
     }

@@ -166,10 +166,10 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
                 new BidirectionalListener(
                         this.descriptionArea.textProperty(), proxy.getDescriptionProperty()
                         , new Object[]{";"}, null, listenerShouldListen);
+                
                 new BidirectionalListener(
                         this.typePickerEditor.valueProperty(), proxy.getTypeProperty()
                         , new Object[]{";"}, null, listenerShouldListen);
-
                 new BidirectionalListener(
                         this.usageTypePickerEditor.valueProperty(), proxy.getUsageTypeProperty()
                         , new Object[]{";"}, null, listenerShouldListen);
@@ -326,11 +326,11 @@ class BidirectionalListener implements ChangeListener {
     private boolean isListening;
     private final BooleanProperty shouldListen;
 
-    public BidirectionalListener(Property changeable1, Property changeable2, Object[] notAllowedValues, Map<Comparable, Comparable> comparisonChecks, BooleanProperty shouldListen) {
-        if (changeable1 == null || changeable2 == null) throw new IllegalArgumentException("Property values must not be null");
+    public BidirectionalListener(Property property1, Property property2, Object[] notAllowedValues, Map<Comparable, Comparable> comparisonChecks, BooleanProperty shouldListen) {
+        if (property1 == null || property2 == null) throw new IllegalArgumentException("Property values must not be null");
 
-        this.changeable1 = changeable1;
-        this.changeable2 = changeable2;
+        this.changeable1 = property1;
+        this.changeable2 = property2;
 
         // Check if not allowed values have been set
         this.notAllowedValues = new ArrayList<>();
@@ -355,7 +355,7 @@ class BidirectionalListener implements ChangeListener {
         customListener = (observable3, oldValue3, newValue3) -> {
         };
         from1To2 = (observable1, oldValue1, newValue1) -> {
-            changed(changeable1, oldValue1, newValue1);
+            changed(property1, oldValue1, newValue1);
         };
         from2To1 = (observable2, oldValue2, newValue2) -> {
             changed2(observable2, oldValue2, newValue2);
@@ -373,64 +373,68 @@ class BidirectionalListener implements ChangeListener {
             }
         });
 
-        changeable1.addListener(from1To2);
-        changeable1.addListener(customListener);
-        changeable2.addListener(from2To1);
+        property1.addListener(from1To2);
+        property1.addListener(customListener);
+        property2.addListener(from2To1);
         isListening = true;
     }
 
     @Override
     public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-        try {
-            if (!notAllowedValues.isEmpty()) {
-                for (Object notAllowed : notAllowedValues) {
-                    try {
-                        if (((String) newValue).contains((String) notAllowed))
-                            throw new IllegalArgumentException("The new value contains at least one of all not allowed values");
-                    } catch (ClassCastException cce) {
-                        throw new IllegalStateException("Changeable1 is not a StringProperty and can not be checked for not allowed values.");
+        if (newValue != null) {
+            try {
+                if (!notAllowedValues.isEmpty()) {
+                    for (Object notAllowed : notAllowedValues) {
+                        try {
+                            if (((String) newValue).contains((String) notAllowed))
+                                throw new IllegalArgumentException("The new value contains at least one of all not allowed values");
+                        } catch (ClassCastException cce) {
+                            throw new IllegalStateException("Changeable1 is not a StringProperty and can not be checked for not allowed values.");
+                        }
                     }
                 }
-            }
-            if (!checks.isEmpty()) {
-                for (Map.Entry<Comparable, Comparable> entry : checks.entrySet()) {
-                    if (entry.getKey().compareTo(entry.getValue()) < 0) {
-                        throw new IllegalArgumentException("The new value doesn't match the comparison checks.");
+                if (!checks.isEmpty()) {
+                    for (Map.Entry<Comparable, Comparable> entry : checks.entrySet()) {
+                        if (entry.getKey().compareTo(entry.getValue()) < 0) {
+                            throw new IllegalArgumentException("The new value doesn't match the comparison checks.");
+                        }
                     }
                 }
+                this.changeable2.setValue(newValue);
+            } catch (IllegalStateException ise) {
+                this.changeable1.setValue(oldValue);
+            } catch (IllegalArgumentException iae) {
+                this.changeable1.setValue(oldValue);
             }
-            this.changeable2.setValue(newValue);
-        } catch (IllegalStateException ise) {
-            this.changeable1.setValue(oldValue);
-        } catch (IllegalArgumentException iae) {
-            this.changeable1.setValue(oldValue);
         }
     }
 
     public void changed2(ObservableValue observable, Object oldValue, Object newValue){
-        try {
-            if (!notAllowedValues.isEmpty()) {
-                for (Object notAllowed : notAllowedValues) {
-                    try {
-                        if (((String) newValue).contains((String) notAllowed))
-                            throw new IllegalArgumentException("The new value contains at least one of all not allowed values");
-                    } catch (ClassCastException cce) {
-                        throw new IllegalStateException("Changeable1 is not a StringProperty and can not be checked for not allowed values.");
+        if(newValue != null) {
+            try {
+                if (!notAllowedValues.isEmpty()) {
+                    for (Object notAllowed : notAllowedValues) {
+                        try {
+                            if (((String) newValue).contains((String) notAllowed))
+                                throw new IllegalArgumentException("The new value contains at least one of all not allowed values");
+                        } catch (ClassCastException cce) {
+                            throw new IllegalStateException("Changeable1 is not a StringProperty and can not be checked for not allowed values.");
+                        }
                     }
                 }
-            }
-            if (!checks.isEmpty()) {
-                for (Map.Entry<Comparable, Comparable> entry : checks.entrySet()) {
-                    if (entry.getKey().compareTo(entry.getValue()) < 0) {
-                        throw new IllegalArgumentException("The new value doesn't match the checks.");
+                if (!checks.isEmpty()) {
+                    for (Map.Entry<Comparable, Comparable> entry : checks.entrySet()) {
+                        if (entry.getKey().compareTo(entry.getValue()) < 0) {
+                            throw new IllegalArgumentException("The new value doesn't match the checks.");
+                        }
                     }
                 }
+                this.changeable1.setValue(newValue);
+            } catch (IllegalStateException ise) {
+                this.changeable2.setValue(oldValue);
+            } catch (IllegalArgumentException iae) {
+                this.changeable2.setValue(oldValue);
             }
-            this.changeable1.setValue(newValue);
-        } catch (IllegalStateException ise) {
-            this.changeable2.setValue(oldValue);
-        } catch (IllegalArgumentException iae) {
-            this.changeable2.setValue(oldValue);
         }
     }
 

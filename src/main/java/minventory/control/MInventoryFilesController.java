@@ -126,37 +126,38 @@ public class MInventoryFilesController {
 	public SimpleListProperty<MInventoryObject> readObjectsFromFile() {
 
 		// Try read object information from file
-		List<MInventoryObject> objectList;
+	    // TODO: resolve quick and dirty solution objectList = null
+		List<MInventoryObject> objectList = null;
 
 		try {
 			// Get Stream of string lines 
 			Stream<String> lines = getStreamOfLines(csv.CSV_OBJECTS_FILE);
 			// Save the stream to a list
 			List<String> lineList = lines.collect(Collectors.toList());
-			objectsToLoad = 0;
 			// Count objects to know how many objects will be loaded in the next step
-			lineList.forEach(action -> { ++objectsToLoad; }); 
+			objectsToLoad = lineList.size();
+			if (objectsToLoad < 1) {
+			    objectsToLoad = 1000;
+			}
 			// Load objects
 			objectList = lineList.stream().skip(1).map(s -> createMInventoryObject(s.split(";")))
 					.collect(Collectors.toList());
 		} catch (NullPointerException npe) {
 			// Add sample objects when file does no exist
 			logger.error("Failed to load objects. Exception is: " + npe);
-			objectList = new ArrayList<>();
-			objectList.add(createMInventoryObject(SAMPLE_STORAGE.split(";")));
-			objectList.add(createMInventoryObject(SAMPLE_ITEM.split(";")));
 		} catch (IllegalStateException ise) {
 			// Add sample objects when error occurs
 			logger.error("Failed to load objects. Exception is: " + ise);
-			objectList = new ArrayList<>();
-			objectList.add(createMInventoryObject(SAMPLE_STORAGE.split(";")));
-			objectList.add(createMInventoryObject(SAMPLE_ITEM.split(";")));
-		}
+		} catch (Exception e) {
+            logger.error("Failed to load objects. Exception is: " +e.getMessage());
+            objectList = new ArrayList<>();
+            objectList.add(createMInventoryObject(SAMPLE_STORAGE.split(";")));
+            objectList.add(createMInventoryObject(SAMPLE_ITEM.split(";")));
+        }
 
 		// Create observable list from available object list
-		SimpleListProperty<MInventoryObject> mInventoryObjectList = new SimpleListProperty<>();
-		ObservableList<MInventoryObject> observableList = FXCollections.observableArrayList(objectList);
-		mInventoryObjectList.setValue(observableList);
+		SimpleListProperty<MInventoryObject> mInventoryObjectList = new SimpleListProperty<>(
+		            FXCollections.observableArrayList(objectList));
 
 		// When all objects have been created add objects into their storage
 		if (!mInventoryObjectList.isEmpty()) {
@@ -165,34 +166,19 @@ public class MInventoryFilesController {
 						.filter(mInventoryObject -> mInventoryObject.getId() == integer).collect(Collectors.toList())
 						.get(0)).addObjectById(integer2);
 			});
+		} else {
+		    logger.trace("there were no objects in save file");
 		}
 
 		return mInventoryObjectList;
 	}
-
+	
 	/**
 	 * Writes all object from data model to a csv file
 	 *
 	 */
 	public void writeObjects() {
-		// Define Files and Folders needed for saving
-		File save = new File(getPath(csv.CSV_OBJECTS_FILE, filesInSameFolder).toString());
-		File path = new File(getPath(null, filesInSameFolder).toString());
-		File images = new File(getPath(IMAGE_FOLDER_NAME, filesInSameFolder).toString());
-
-		// Check for non existing folders and files
-		if (!save.exists() || !path.exists() || !images.exists()) {
-			try {
-				if (!path.exists())
-					path.mkdir();
-				if (!images.exists())
-					images.mkdir();
-				if (!save.exists())
-					save.createNewFile();
-			} catch (IOException ioe) {
-				System.out.println("Creating save folders failed " + ioe.getMessage());
-			}
-		}
+	    checkSaveLocation();
 		// Do the saving
 		try (BufferedWriter writer = Files.newBufferedWriter(getPath(csv.CSV_OBJECTS_FILE, filesInSameFolder),
 				StandardCharsets.UTF_8)) {
@@ -211,9 +197,10 @@ public class MInventoryFilesController {
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {
+		    logger.error("writing objects to file failed");
 			throw new IllegalStateException("save failed " + e.getMessage());
 		}
-
+		logger.info("successfully wrote objects to file");
 	}
 
 	/**
@@ -246,6 +233,7 @@ public class MInventoryFilesController {
 	 * Write app settings to a csv file
 	 */
 	public void writeAppSettings() {
+	    checkSaveLocation();
 		try (BufferedWriter writer = Files.newBufferedWriter(getPath(csv.CSV_APP_SETTINGS_FILE, filesInSameFolder),
 				StandardCharsets.UTF_8)) {
 			writer.write(csv.APP_SETTINGS_FILE_HEADER);
@@ -263,14 +251,36 @@ public class MInventoryFilesController {
 			writeProfileData();
 
 		} catch (IOException e) {
-			throw new IllegalStateException("save of app settings failed " + e.getMessage());
+			throw new IllegalStateException(e);
 		}
+	}
+	
+	private void checkSaveLocation() {
+	    // Define Files and Folders needed for saving
+        File save = new File(getPath(csv.CSV_OBJECTS_FILE, filesInSameFolder).toString());
+        File path = new File(getPath(null, filesInSameFolder).toString());
+        File images = new File(getPath(IMAGE_FOLDER_NAME, filesInSameFolder).toString());
+
+        // Check for non existing folders and files
+        if (!save.exists() || !path.exists() || !images.exists()) {
+            try {
+                if (!path.exists())
+                    path.mkdir();
+                if (!images.exists())
+                    images.mkdir();
+                if (!save.exists())
+                    save.createNewFile();
+            } catch (IOException ioe) {
+                System.out.println("Creating save folders failed " + ioe.getMessage());
+            }
+        }
 	}
 
 	/**
 	 * Write profile data
 	 */
 	public void writeProfileData() {
+	    checkSaveLocation();
 		try (BufferedWriter writer = Files.newBufferedWriter(getPath(csv.CSV_PROFILE_FILE, filesInSameFolder),
 				StandardCharsets.UTF_8)) {
 			// TODO copy background image
@@ -402,7 +412,7 @@ public class MInventoryFilesController {
 	private MInventoryObject createMInventoryObject(String[] arguments) {
 
 		int id = Integer.parseInt(arguments[csv.OBJECT_ID]);
-		
+		if(objectsToLoad < 1) objectsToLoad = 1000;
 		int progressStepInA100k = 100000/objectsToLoad;
 
 		String name; // Loading the name takes 1 of 30
@@ -428,15 +438,16 @@ public class MInventoryFilesController {
 			List<String> list = (List<String>) pathAsList.clone();
 			list.add(IMAGE_FOLDER_NAME);
 			String imageExtension = arguments[csv.IMAGE_FILE_EXTENSION];
+			logger.info(id+" " +imageExtension);
 			File testFile = new File(Paths.get(composePath(list, ("" + id + "-1" + imageExtension))).toUri());
 			if (testFile.exists())
-				image = new CustomImage(Paths.get(composePath(list, ("" + id + "-1.jpg"))).toUri().toString(),
-						composePath(list, ("" + id + "-1.jpg")));
+				image = new CustomImage(Paths.get(composePath(list, ("" + id + "-1" + imageExtension))).toUri().toString(),
+						composePath(list, ("" + id + "-1" + imageExtension)));
 			else
 				throw new InvalidPathException("Image not found",
-						"" + id + "-1.jpg" + " in " + composePath(list, null));
+						"" + id + "-1"+ imageExtension + " in " + composePath(list, null));
 		} catch (InvalidPathException ipe) {
-			System.out.println(ipe.getMessage() + "\n" + ipe.getStackTrace());
+			logger.error(ipe.getMessage() + "\n" + ipe.getStackTrace());
 			image = null;
 		}
 		progressProperty.set(progressProperty.get()+(progressStepInA100k/30)*10);

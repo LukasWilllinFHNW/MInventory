@@ -20,7 +20,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
-import jdk.internal.org.objectweb.asm.tree.analysis.Value;
 
 /**
  * Created by Lukas Willin on 02.12.2015.
@@ -286,15 +285,15 @@ public class MInventoryDataModel {
             proxy.getDescriptionProperty().unbindBidirectional(object.getDescriptionProperty());
             proxy.getImageProperty().unbindBidirectional(object.getImageProperty());
             proxy.getStateOfDecayProperty().unbindBidirectional(object.getStateOfDecayProperty());
-            proxy.getTypeProperty().unbindBidirectional(object.getTypeProperty());
-            proxy.getUsageTypeProperty().unbindBidirectional(object.getUsageTypeProperty());
             proxy.getWeightProperty().unbindBidirectional(object.getWeightProperty());
             proxy.getHeightProperty().unbindBidirectional(object.getHeightProperty());
             proxy.getDepthProperty().unbindBidirectional(object.getDepthProperty());
             proxy.getLengthProperty().unbindBidirectional(object.getLengthProperty());
             proxy.getColorProperty().unbindBidirectional(object.getColorProperty());
             proxy.getDistinctAttributeProperty().unbindBidirectional(object.getDistinctAttributeProperty());
-
+            proxy.getTypeProperty().unbindBidirectional(object.getTypeProperty());
+            proxy.getUsageTypeProperty().unbindBidirectional(object.getUsageTypeProperty());
+            
             proxy.setId(-1);
             proxy.setIdentifier(' ');
 
@@ -318,15 +317,15 @@ public class MInventoryDataModel {
             proxy.getDescriptionProperty().bindBidirectional(newObject.getDescriptionProperty());
             proxy.getImageProperty().bindBidirectional(newObject.getImageProperty());
             proxy.getStateOfDecayProperty().bindBidirectional(newObject.getStateOfDecayProperty());
-            proxy.getTypeProperty().bindBidirectional(newObject.getTypeProperty());
-            proxy.getUsageTypeProperty().bindBidirectional(newObject.getUsageTypeProperty());
             proxy.getWeightProperty().bindBidirectional(newObject.getWeightProperty());
             proxy.getHeightProperty().bindBidirectional(newObject.getHeightProperty());
             proxy.getDepthProperty().bindBidirectional(newObject.getDepthProperty());
             proxy.getLengthProperty().bindBidirectional(newObject.getLengthProperty());
             proxy.getColorProperty().bindBidirectional(newObject.getColorProperty());
             proxy.getDistinctAttributeProperty().bindBidirectional(newObject.getDistinctAttributeProperty());
-
+            proxy.getTypeProperty().bindBidirectional(newObject.getTypeProperty());
+            proxy.getUsageTypeProperty().bindBidirectional(newObject.getUsageTypeProperty());
+            
             proxy.setId(newObject.getId());
             //if(newID > 0 ) this.currentSelectedId.setValue(newObject.getId());
             if (newObject instanceof MInventoryStorage) proxy.setIdentifier('s');

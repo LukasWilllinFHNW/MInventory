@@ -48,7 +48,7 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
     };
 
     private TextField txtSearch;
-
+    
     private final BooleanProperty withFilters;
 
     /**

@@ -49,8 +49,8 @@ public class MInventoryPresentationModel {
     private final DoubleProperty SCREEN_SIZE_WIDTH = new SimpleDoubleProperty();
     private final DoubleProperty SCREEN_SIZE_HEIGHT = new SimpleDoubleProperty();
     
-    private final IntegerProperty x = new SimpleIntegerProperty();
-    private final IntegerProperty y = new SimpleIntegerProperty();
+    private final IntegerProperty posX = new SimpleIntegerProperty();
+    private final IntegerProperty posY = new SimpleIntegerProperty();
 
     private final DoubleProperty windowWidth = new SimpleDoubleProperty();
     private final DoubleProperty windowHeight = new SimpleDoubleProperty();
@@ -74,8 +74,8 @@ public class MInventoryPresentationModel {
         if (isStandart) {
             windowHeight.set(WINDOW_HEIGHT);
             windowWidth.set(WINDOW_WIDTH);
-            x.set((int) ((SCREEN_SIZE_WIDTH.get()/2) - (WINDOW_WIDTH/2)));
-            y.set((int) ((SCREEN_SIZE_HEIGHT.get()/2) - (WINDOW_HEIGHT/2)));
+            posX.set((int)WINDOW_HEIGHT/2);
+            posY.set((int)WINDOW_WIDTH/6);
             windowTitle.set(MInventoryPresentationModel.WINDOW_TITLE);
         } else {
             // Leave properties unset
@@ -125,8 +125,8 @@ public class MInventoryPresentationModel {
     }
     
     public String getAppSettingsAsLine() {
-    	return new String(x.get() + ";" 
-    			+ y.get() + ";" 
+    	return new String(posX.get() + ";" 
+    			+ posY.get() + ";" 
     			+ windowWidth.get() + ";" 
     			+ windowHeight.get() + ";" 
     			+ lastProfile + ";"
@@ -148,8 +148,8 @@ public class MInventoryPresentationModel {
     }
 
     // --- GETTER ---
-    public double getX() { return x.getValue().doubleValue(); }
-    public double getY() { return y.getValue().doubleValue(); }
+    public double getX() { return posX.getValue().doubleValue(); }
+    public double getY() { return posY.getValue().doubleValue(); }
 
     public double getWindowHeight() {
         // windowHeight should never be smaller than standard
@@ -187,8 +187,8 @@ public class MInventoryPresentationModel {
 
 
     // --- SETTER ---
-    public void setX(double x) { this.x.setValue(x); }
-    public void setY(double y) { this.y.setValue(y); }
+    public void setX(double x) { this.posX.setValue(x); }
+    public void setY(double y) { this.posY.setValue(y); }
 
     public void setWindowWidth(double width) { this.windowWidth.set(width); }
     public void setWindowHeight(double height) { this.windowHeight.set(height); }

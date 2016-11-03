@@ -2,8 +2,6 @@ package minventory.model;
 
 import minventory.control.*;
 import minventory.gui.CustomImage;
-import minventory.control.RemoveFromStorageCommand;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -14,11 +12,9 @@ import javafx.scene.image.Image;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javafx.beans.value.ChangeListener;
 
 /**
@@ -27,12 +23,16 @@ import javafx.beans.value.ChangeListener;
  * @author Dieter Holz (Undo Redo)
  */
 public class MInventoryDataModel {
+    
+    public static final MInventoryDataModel inst = new MInventoryDataModel();
+    
+    private final Logger logger = (Logger) LogManager.getLogger(MInventoryFilesController.class);
 
     // Controller to save
     private MInventoryFilesController controller;
 
     // The current selected id
-    private final IntegerProperty currentSelectedId = new SimpleIntegerProperty(-1);
+    public final IntegerProperty currentSelectedId = new SimpleIntegerProperty(-1);
 
     // Proxy Object
     private final MInventoryObjectProxy proxy = MInventoryObjectProxy.emptyObjectProxy();
@@ -51,73 +51,23 @@ public class MInventoryDataModel {
     private SimpleListProperty<MInventoryObject> mInventoryObjectList;
     private SimpleListProperty<MInventoryObject> mInventoryObjectListProxy = new SimpleListProperty<>();
     private SimpleBooleanProperty proxyListIsFiltered;
+    
+    //DisplayProperties
+    private static final BooleanProperty removeFromStorageDisabled = new SimpleBooleanProperty();
+    private static final BooleanProperty lookIntoStorageDisabled = new SimpleBooleanProperty();
 
-    // Stacks for undo redo
-    private final ObservableList<Command> undoStack = FXCollections.observableArrayList();
-    private final ObservableList<Command> redoStack = FXCollections.observableArrayList();
-
-    // If node should be disabled
-    private final BooleanProperty undoDisabled = new SimpleBooleanProperty();
-    private final BooleanProperty redoDisabled = new SimpleBooleanProperty();
-    private final BooleanProperty removeFromStorageDisabled = new SimpleBooleanProperty();
-    private final BooleanProperty lookIntoStorageDisabled = new SimpleBooleanProperty();
-
-    // Delayed Undo redo
-    private long lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
-    private long waitTime = 500;
-    private ObservableValue lastChangedProperty;
-    private final ChangeListener<Object> propertyChangeListenerForUndoSupport = (observable, oldValue, newValue) -> {
-        if (!undoStack.isEmpty()) {
-            // If last logged time is younger -> update or create command
-            if (Calendar.getInstance().getTimeInMillis() - waitTime < lastLoggedTimeInMillis) {
-                // Update only ValueChangeCommands and if property is still the same
-                if (lastChangedProperty == observable && undoStack.get(0) instanceof ValueChangeCommand) {
-                    undoStack.get(0).updateRedo(newValue);
-                    // Change occured -> reset the timer
-                    lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
-                // It is not the same property or not instance of ValueChangeCommand -> Create new
-                } else {
-                    redoStack.clear();
-                    undoStack.add(0, new ValueChangeCommand(MInventoryDataModel.this, (Property) observable, oldValue, newValue));
-                    // New property -> update last changed property
-                    lastChangedProperty = observable;
-                    // Change occured -> reset the timer
-                    lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
-                }
-            // The last logged time is too old
-            } else {
-                redoStack.clear();
-                undoStack.add(0, new ValueChangeCommand(MInventoryDataModel.this, (Property) observable, oldValue, newValue));
-                // New property -> update last changed property
-                lastChangedProperty = observable;
-                // Change occured -> reset the timer
-                lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
-            }
-        } else {
-            redoStack.clear();
-            undoStack.add(0, new ValueChangeCommand(MInventoryDataModel.this, (Property) observable, oldValue, newValue));
-            // New property -> update last changed property
-            lastChangedProperty = observable;
-            // Change occured -> reset the timer
-            lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
-        }
-    };
-
-
+    
     // --- CONSTRUCTORS ---
     public MInventoryDataModel() {
 
         proxyListIsFiltered = new SimpleBooleanProperty();
-
-        undoDisabled.bind(Bindings.isEmpty(undoStack));
-        redoDisabled.bind(Bindings.isEmpty(redoStack));
 
         currentSelectedId.addListener((observable, oldValue, newValue) -> {
             MInventoryObject oldSelection = getById((int) oldValue);
 
             if (oldSelection != null) {
                 unselect(oldSelection);
-                disableUndoSupport(oldSelection);
+                UnRedoCtrl.disableUndoSupport(oldSelection);
             }
 
             if (newValue.intValue() != -1) {
@@ -125,7 +75,7 @@ public class MInventoryDataModel {
 
                 if (newSelection != null) {
                     select(newSelection);
-                    enableUndoSupport(newSelection);
+                    UnRedoCtrl.enableUndoSupport(newSelection);
                     removeFromStorageDisabled.set((getContainingStorage(newValue.intValue()) == null));
                     lookIntoStorageDisabled.set(newSelection instanceof MInventoryItem);
                     if (newSelection instanceof MInventoryStorage)
@@ -137,68 +87,16 @@ public class MInventoryDataModel {
 
     }
 
-    // --- API ---
-    // -- undo redo --
-    public void undo() {
-        if (undoStack.isEmpty()) {
-            return;
-        }
-        Command cmd = undoStack.get(0);
-        undoStack.remove(0);
-        redoStack.add(0, cmd);
-
-        cmd.undo();
-    }
-
-    public void redo() {
-        if (redoStack.isEmpty()) {
-            return;
-        }
-        Command cmd = redoStack.get(0);
-        redoStack.remove(0);
-        undoStack.add(0, cmd);
-
-        cmd.redo();
-    }
+    // --- API ---    
     /**
-     * Set a value for any property
-     * @param property the property of which the value should be changes
+     * Sets a value for any property
+     * @param property the property of which the value should be changed
      * @param newValue the new Value of the property
      */
     public void setPropertyValue(Property property, Object newValue){
-        property.removeListener(propertyChangeListenerForUndoSupport);
+        property.removeListener(UnRedoCtrl.propertyChangeListenerForUndoSupport);
         property.setValue(newValue);
-        property.addListener(propertyChangeListenerForUndoSupport);
-    }
-    private void disableUndoSupport(MInventoryObject object) {
-        // MAKE SURE ONLY ONE LISTENER PER OBJECT IS REMOVED
-        object.getNameProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getDescriptionProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getColorProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getImageProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getLengthProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getHeightProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getDepthProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getWeightProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getDistinctAttributeProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getTypeProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getUsageTypeProperty().removeListener(propertyChangeListenerForUndoSupport);
-        object.getStateOfDecayProperty().removeListener(propertyChangeListenerForUndoSupport);
-    }
-    private void enableUndoSupport(MInventoryObject object) {
-        // MAKE SURE ONLY ONE LISTENER PER PROPERTY IS ADDED
-        object.getNameProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getDescriptionProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getColorProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getImageProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getLengthProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getHeightProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getDepthProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getWeightProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getDistinctAttributeProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getTypeProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getUsageTypeProperty().addListener(propertyChangeListenerForUndoSupport);
-        object.getStateOfDecayProperty().addListener(propertyChangeListenerForUndoSupport);
+        property.addListener(UnRedoCtrl.propertyChangeListenerForUndoSupport);
     }
 
 
@@ -207,21 +105,21 @@ public class MInventoryDataModel {
         toList.setValue(FXCollections.observableList(inList.stream()
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
-        proxyListIsFiltered.set(false);
+        //proxyListIsFiltered.set(false);
     }
     public void filterByStorage(ListProperty<MInventoryObject> inList, ListProperty<MInventoryObject> toList) {
         toList.setValue(FXCollections.observableList(inList.stream()
                 .filter(mInventoryObject -> (mInventoryObject instanceof MInventoryStorage))
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
-        proxyListIsFiltered.set(true);
+        //proxyListIsFiltered.set(true);
     }
     public void filterByItem(ListProperty<MInventoryObject> inList, ListProperty<MInventoryObject> toList) {
         toList.setValue(FXCollections.observableList(inList.stream()
                 .filter(mInventoryObject -> (mInventoryObject instanceof MInventoryItem))
                 .map(object -> getById(object.getId()))
                 .collect(Collectors.toList())));
-        proxyListIsFiltered.set(true);
+        //proxyListIsFiltered.set(true);
     }
     public void searchFor(String oldSearch, String newSearch,ListProperty<MInventoryObject> inList , ListProperty<MInventoryObject> toList) {
         newSearch.trim();
@@ -271,7 +169,7 @@ public class MInventoryDataModel {
     /**
      * Selects the first object in object list proxy catching all expected exceptions
      */
-    private void exceptionSafeSelectFirst(ListProperty<MInventoryObject> fromList){
+    public void exceptionSafeSelectFirst(ListProperty<MInventoryObject> fromList){
         try {
             updateSelection(fromList.get(0));
         } catch (IndexOutOfBoundsException iobe) {
@@ -301,7 +199,7 @@ public class MInventoryDataModel {
                 temporaryObject = null;
             }
         } else {
-
+            logger.trace("unselect method in "+this.getClass().getName()+": object was null");
         }
     }
 
@@ -330,6 +228,8 @@ public class MInventoryDataModel {
             //if(newID > 0 ) this.currentSelectedId.setValue(newObject.getId());
             if (newObject instanceof MInventoryStorage) proxy.setIdentifier('s');
             if (newObject instanceof MInventoryItem) proxy.setIdentifier('i');
+        } else {
+            logger.trace("select method in "+this.getClass().getName()+": object was null");
         }
     }
 
@@ -353,11 +253,11 @@ public class MInventoryDataModel {
         if (object == null) {
             MInventoryObject remove = getById(currentSelectedId.get());
             unselect(remove);
-            disableUndoSupport(remove);
+            UnRedoCtrl.disableUndoSupport(remove);
             if (mInventoryObjectListProxy.contains(remove))
                 mInventoryObjectListProxy.remove(remove);
             mInventoryObjectList.remove(remove);
-            undoStack.add(0, new RemoveCommand(MInventoryDataModel.this, remove, 0));
+            UnRedoCtrl.addUndo(new RemoveCommand(MInventoryDataModel.this, remove, 0));
             if(!mInventoryObjectList.isEmpty()) {
                 updateSelection(mInventoryObjectList.get(0));
             } else {
@@ -365,7 +265,7 @@ public class MInventoryDataModel {
             }
             return;
         } else {
-            disableUndoSupport(object);
+            UnRedoCtrl.disableUndoSupport(object);
             if (mInventoryObjectListProxy.contains(object))
                 mInventoryObjectListProxy.remove(object);
             mInventoryObjectList.remove(object);
@@ -465,7 +365,7 @@ public class MInventoryDataModel {
             filterByStorage(mInventoryObjectList, mInventoryObjectListProxy);
         }
         updateSelection(getById(newID));
-        undoStack.add(0, new AddCommand(MInventoryDataModel.this, getById(newID), 0));
+        UnRedoCtrl.addUndo(new AddCommand(MInventoryDataModel.this, getById(newID), 0));
     }
 
     public void addImage(CustomImage ci) {
@@ -486,7 +386,7 @@ public class MInventoryDataModel {
         redoRemoveFromStorage(put);
         storage.addObjectById(put.getId());
         removeFromStorageDisabled.set(false);
-        undoStack.add(0, new AddToStorageCommand(MInventoryDataModel.this, put, storage));
+        UnRedoCtrl.addUndo(new AddToStorageCommand(MInventoryDataModel.this, put, storage));
     }
 
     public void redoPutObjectIntoStorage(MInventoryStorage storage, MInventoryObject put) {
@@ -498,7 +398,7 @@ public class MInventoryDataModel {
     // -- remove --
     public void removeFromStorage(MInventoryObject remove) {
         MInventoryStorage storage = redoRemoveFromStorage(remove);
-        undoStack.add(0, new RemoveFromStorageCommand(MInventoryDataModel.this, storage,  remove));
+        UnRedoCtrl.addUndo(new RemoveFromStorageCommand(MInventoryDataModel.this, storage,  remove));
     }
 
     public MInventoryStorage redoRemoveFromStorage(MInventoryObject remove) {
@@ -645,5 +545,10 @@ public class MInventoryDataModel {
 
     public void setMInventoryController(MInventoryFilesController mInventoryFilesController) {
         if (controller == null) controller = mInventoryFilesController;
+    }
+    
+    // --- Static API ---
+    public static MInventoryDataModel getInstance() {
+        return inst;
     }
 }

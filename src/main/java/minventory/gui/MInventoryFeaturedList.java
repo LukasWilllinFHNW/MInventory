@@ -34,8 +34,8 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
     private Pane pr;
 
     /** The origin list of filtered list should never be altered*/
-    ListProperty<MInventoryObject> originList;
-    /** The list that can be filtert and altered by search and list view is bound to */
+    ListProperty<MInventoryObject> internalList;
+    /** The list that can be filtered and altered by search and list view is bound to */
     ListProperty<MInventoryObject> connectedList;
 
     private Button filterByStorage;
@@ -72,7 +72,7 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
 
     // --- API ---
     public void connectToModel() {
-        originList = dataModel.getMInventoryObjectList();
+        internalList = dataModel.getMInventoryObjectList();
         connectedList = mInventoryListView.connectToModel();
         currentSelectedObjectId.addListener(reportSelectionToModel);
         this.disableProperty().bind(presModel.getAddDisabledProperty());
@@ -80,9 +80,9 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
 
     public void connectToListProperty(ListProperty<MInventoryObject> list) {
         currentSelectedObjectId.removeListener(reportSelectionToModel);
-        originList = null;
-        originList = new SimpleListProperty<>();
-        originList.setValue(FXCollections.observableArrayList(list.stream()
+        internalList = null;
+        internalList = new SimpleListProperty<>();
+        internalList.setValue(FXCollections.observableArrayList(list.stream()
                 .map(mInventoryObject -> dataModel.getById(mInventoryObject.getId()))
                 .collect(Collectors.toList())));
         connectedList = mInventoryListView.connectToListProperty(list);
@@ -95,8 +95,8 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
 
     // --- HELPERS ---
     private void updateOriginList(ListProperty<MInventoryObject> newList) {
-        originList = new SimpleListProperty<>();
-        originList.setValue(FXCollections.observableArrayList(newList.stream()
+        internalList = new SimpleListProperty<>();
+        internalList.setValue(FXCollections.observableArrayList(newList.stream()
                 .map(mInventoryObject -> dataModel.getById(mInventoryObject.getId()))
                 .collect(Collectors.toList())));
     }
@@ -150,8 +150,8 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
     @Override
     public void addListeners() {
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.trim().isEmpty()) dataModel.searchFor(oldValue, newValue, originList, connectedList);
-            else dataModel.noFilter(originList, connectedList);});
+            if (!newValue.trim().isEmpty()) dataModel.searchFor(oldValue, newValue, internalList, connectedList);
+            else dataModel.noFilter(internalList, connectedList);});
 
         pr.heightProperty().addListener((observable, oldValue, newValue) -> {
             mInventoryListView.setPrefHeight(newValue.doubleValue()); });
@@ -167,26 +167,17 @@ class MInventoryFeaturedList extends VBox implements ViewTemplate{
             noFilter.setOnMouseClicked(event -> {
                 dataModel.noFilter(dataModel.getMInventoryObjectList(), dataModel.getMInventoryObjectListProxy());
                 updateOriginList(dataModel.getMInventoryObjectList());
+                dataModel.exceptionSafeSelectFirst(dataModel.getMInventoryObjectList());
             });
             filterByStorage.setOnMouseClicked(event -> {
                 dataModel.filterByStorage(dataModel.getMInventoryObjectList(), dataModel.getMInventoryObjectListProxy());
-                /*filterByStorage.setGraphic(new ImageView(new CustomImage(
-                        new File(presModel.getIcon("link70.png")).toURI().toString(),
-                        presModel.getIcon("link70.png"))));*/
-                filterByStorage.setContentDisplay(ContentDisplay.LEFT);
-                noFilter.setGraphic(null);
-                filterByItem.setGraphic(null);
                 updateOriginList(dataModel.getMInventoryObjectListProxy());
+                dataModel.exceptionSafeSelectFirst(dataModel.getMInventoryObjectListProxy());
             });
             filterByItem.setOnMouseClicked(event -> {
                 dataModel.filterByItem(dataModel.getMInventoryObjectList(), dataModel.getMInventoryObjectListProxy());
-                /*filterByItem.setGraphic(new ImageView(new CustomImage(
-                        new File(presModel.getIcon("link70.png")).toURI().toString(),
-                        presModel.getIcon("link70.png"))));*/
-                filterByStorage.setContentDisplay(ContentDisplay.LEFT);
-                filterByStorage.setGraphic(null);
-                noFilter.setGraphic(null);
                 updateOriginList(dataModel.getMInventoryObjectListProxy());
+                dataModel.exceptionSafeSelectFirst(dataModel.getMInventoryObjectListProxy());
             });
         }
     }

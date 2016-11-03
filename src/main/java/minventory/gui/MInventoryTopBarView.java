@@ -2,6 +2,7 @@ package minventory.gui;
 
 import minventory.model.MInventoryDataModel;
 import minventory.model.MInventoryPresentationModel;
+import minventory.model.UnRedoCtrl;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -117,10 +118,10 @@ public class MInventoryTopBarView extends GridPane implements ViewTemplate{
             dataModel.save(); });
 
         this.undoButton.setOnMouseClicked(event -> {
-            dataModel.undo();
+            UnRedoCtrl.undo();
         });
         this.redoButton.setOnMouseClicked(event -> {
-            dataModel.redo();
+            UnRedoCtrl.redo();
         });
     }
 

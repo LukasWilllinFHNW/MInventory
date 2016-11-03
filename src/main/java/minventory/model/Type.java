@@ -1,26 +1,31 @@
 package minventory.model;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Created by Lukas on 25.11.2015.
  */
-public class Type {
+public class Type extends SimpleObjectProperty<Object>{
 
     /** Type of the object. */
     private StringProperty type = new SimpleStringProperty();
     /** For what the object is used. */
     private StringProperty usageType = new SimpleStringProperty();
 
-    public Type () {
-
-    }
+    
+    // --- CONSTRUCTOR ---
+    public Type () { }
     public Type(String type, String usageType) {
         this.type.setValue(type);
         this.usageType.setValue(usageType);
     }
-
 
     // --- GETTER ---
     /** Get definition on how the object is used or what it is used for. */
@@ -50,5 +55,60 @@ public class Type {
             throw new NullPointerException("Type cannot be set to null.");
         }
         this.type.setValue(type);
+    }
+    
+    @Override
+    public boolean isBound() {
+        return false;
+    }
+    @Override
+    public Object getBean() {
+        return super.getBean();
+    }
+    @Override
+    public String getName() {
+        return super.getName();
+    }
+    @Override
+    public void addListener(ChangeListener arg0) {
+        type.addListener(arg0);
+        usageType.addListener(arg0);
+    }
+    @Override
+    public void removeListener(ChangeListener arg0) {
+        type.removeListener(arg0);
+        usageType.removeListener(arg0);
+    }
+    @Override
+    public void addListener(InvalidationListener arg0) {
+        type.addListener(arg0);
+        usageType.addListener(arg0);
+    }
+    @Override
+    public void removeListener(InvalidationListener arg0) {
+        type.removeListener(arg0);
+        usageType.removeListener(arg0);
+    }
+    @Override
+    /**
+     * Concatenates values from both properties to a single string
+     * @return string type.get + usageType.get
+     */
+    public Object get() {
+        return type.getValue()+";"+usageType.getValue();
+    }
+    
+    // Not implemented Property functions from this class
+    @Override
+    public void set(Object arg0) {
+        throw new NotImplementedException();
+    }
+    @Override
+    public void bind(ObservableValue arg0) {
+        throw new NotImplementedException();
+    }
+    @Override
+    public void unbind() {
+        throw new NotImplementedException();
     }
 }

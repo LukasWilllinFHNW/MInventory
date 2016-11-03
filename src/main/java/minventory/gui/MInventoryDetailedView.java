@@ -170,6 +170,7 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
                 new BidirectionalListener(
                         this.typePickerEditor.valueProperty(), proxy.getTypeProperty()
                         , new Object[]{";"}, null, listenerShouldListen);
+                
                 new BidirectionalListener(
                         this.usageTypePickerEditor.valueProperty(), proxy.getUsageTypeProperty()
                         , new Object[]{";"}, null, listenerShouldListen);

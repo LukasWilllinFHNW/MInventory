@@ -142,12 +142,6 @@ public class MInventoryFilesController {
 			// Load objects
 			objectList = lineList.stream().skip(1).map(s -> createMInventoryObject(s.split(";")))
 					.collect(Collectors.toList());
-		} catch (NullPointerException npe) {
-			// Add sample objects when file does no exist
-			logger.error("Failed to load objects. Exception is: " + npe);
-		} catch (IllegalStateException ise) {
-			// Add sample objects when error occurs
-			logger.error("Failed to load objects. Exception is: " + ise);
 		} catch (Exception e) {
             logger.error("Failed to load objects. Exception is: " +e.getMessage());
             objectList = new ArrayList<>();

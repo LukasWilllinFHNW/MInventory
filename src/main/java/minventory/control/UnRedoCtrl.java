@@ -1,4 +1,4 @@
-package minventory.model;
+package minventory.control;
 
 import java.util.Calendar;
 
@@ -10,8 +10,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import minventory.control.Command;
-import minventory.control.ValueChangeCommand;
+import minventory.model.MInventoryDataModel;
+import minventory.model.MInventoryObject;
 
 public class UnRedoCtrl {
     
@@ -25,24 +25,32 @@ public class UnRedoCtrl {
 
     // --- Variables for delayed UndoRedo ---
     private static long lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
-    private static long waitTime = 1000;
+    private static long waitTime = 6000;
     private static ObservableValue lastChangedProperty;
     private static Object lastOldValue; private static Object lastNewValue;
     private static int lastObjectId = -3; // TODO: check if selection changed
     
+    public static final ChangeListener<Object> propertyChangeListenerForUndoSupport = (observable, oldValue, newValue) -> {
+        trackChange(observable, oldValue, newValue);
+    };
+    public static final ChangeListener<? super Number> objectIdListener = (observable, oldValue, newValue) -> {
+        //trackChange(lastChangedProperty, lastOldValue, lastNewValue);
+    };
+    
+    // --- INITIALIZE ---
     {
         undoDisabled.bind(Bindings.isEmpty(undoStack));
         redoDisabled.bind(Bindings.isEmpty(redoStack));
+        // TODO This line isnt able to add the listener to the currentSelectedId-property find out why?
+        // For now the objectIdListener is added in the MInventoryModel's constructor (Which is pretty hacky)
+        MInventoryDataModel.getInstance().currentSelectedId.addListener(objectIdListener);
     }
     
-    
-    public static final ChangeListener<Object> propertyChangeListenerForUndoSupport = (observable, oldValue, newValue) -> {
-        UnRedoCtrl.trackChange(observable, oldValue, newValue);
-    };
-    
+    // --- API ---
     /**
      * Creates a new undo instance and applies it to the undo-stack
      * deleting the redo-stack's content and resetting the timer
+     * the undo stack values are like a snapshot of the property on command creation
      * @param observable
      * @param oldValue
      * @param newValue
@@ -50,22 +58,29 @@ public class UnRedoCtrl {
     private static void createUndo(ObservableValue observable, Object oldValue, Object newValue) {
         redoStack.clear();
         undoStack.add(0, new ValueChangeCommand(MInventoryDataModel.inst, (Property) observable, oldValue, newValue));
-        // New property -> update last changed property
+        // New property -> update last changed property values
         lastChangedProperty = observable;
-        // Change occured -> reset the timer
+        lastOldValue = oldValue;
+        lastNewValue = newValue;
         lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
+        lastObjectId = MInventoryDataModel.getInstance().getCurrentSelectedId();
     }
     /**
      * Updates the last added undo instance with newer value
      * and then resets the timer
+     * TODO there might be an error in the code here
      * @param observable
      * @param oldValue
      * @param newValue
      */
     private static void updateUndo(ObservableValue observable, Object oldValue, Object newValue) {
         undoStack.get(0).updateRedo(newValue);
-        // Change occured -> reset the timer
+        // New property -> update last changed property values
         lastLoggedTimeInMillis = Calendar.getInstance().getTimeInMillis();
+        lastObjectId = MInventoryDataModel.getInstance().getCurrentSelectedId();
+        lastChangedProperty = observable;
+        lastOldValue = oldValue;
+        lastNewValue = newValue;
     }
     public static void addUndo(Command command) {
         undoStack.add(0, command);
@@ -130,6 +145,17 @@ public class UnRedoCtrl {
         object.getUsageTypeProperty().addListener(propertyChangeListenerForUndoSupport);
         object.getStateOfDecayProperty().addListener(propertyChangeListenerForUndoSupport);
     }
+    
+    /**
+     * Sets a value for any property
+     * @param property the property of which the value should be changed
+     * @param newValue the new Value of the property
+     */
+    public static void setPropertyValue(Property property, Object newValue){
+        property.removeListener(UnRedoCtrl.propertyChangeListenerForUndoSupport);
+        property.setValue(newValue);
+        property.addListener(UnRedoCtrl.propertyChangeListenerForUndoSupport);
+    }
 
     /**
      * This function keeps track of the cahnges made in inventory objects
@@ -143,6 +169,8 @@ public class UnRedoCtrl {
      * The last undo-instance is updated when:
      *  - last tracked change is younger than x milli seconds
      *      & neither the property nor the object has changed
+     *      
+     * TODO: Maybe I should only one time do the create new command at the start and then decide whether i update it or not?
      * @param observable
      * @param oldValue
      * @param newValue
@@ -152,63 +180,31 @@ public class UnRedoCtrl {
             if (lastObjectId == MInventoryDataModel.getInstance().getCurrentSelectedId()) {
                 // Still the same object selected
                 //if (undoStack.get(0) instanceof ValueChangeCommand) {
-                    if (lastChangedProperty == observable) {
-                        // property still the same
-                        if (Calendar.getInstance().getTimeInMillis() > lastLoggedTimeInMillis + waitTime) {
-                            // Last logged time is further in the past then wait time and should create new
-                            createUndo(observable, oldValue, newValue);
-                        } else {
-                            // Last logged time is not far back enough to create a new undo
-                            updateUndo(observable, oldValue, newValue);
-                        }
-                    } else {
-                        // changed the property then must create new undo for old property
-                        if (lastChangedProperty!=null)
-                            createUndo(lastChangedProperty, lastOldValue, lastNewValue);
+                if (lastChangedProperty == observable) {
+                    // property still the same
+                    if (Calendar.getInstance().getTimeInMillis() > lastLoggedTimeInMillis + waitTime) {
+                        // Last logged time is further in the past then wait time and should create a new undo
                         createUndo(observable, oldValue, newValue);
-                        // after we created a new undo we need to update the last** entries
-                        lastChangedProperty = observable; lastOldValue = oldValue; lastNewValue=newValue;
+                    } else {
+                        // Last logged time is not far back enough to create a new undo
+                        updateUndo(observable, oldValue, newValue);
                     }
-                //} else {
-                //    // not instance of ValueChangeCommand need to create a new undo for last** & operation
-                //    if (lastChangedProperty!=null)
-                //        createUndo(lastChangedProperty, lastOldValue, lastNewValue);
-                //    createUndo(observable, oldValue, newValue);
-                //    // do not update any last**
-                //}
-                
+                } else {
+                    // changed the property then must create new undo for old property
+                    if (lastChangedProperty!=null)
+                        //createUndo(lastChangedProperty, lastOldValue, lastNewValue);
+                    createUndo(observable, oldValue, newValue);
+                }                
             } else {
                 // other object has been selected
-                // time doesn't matter create new undo for oldObject with oldValue
                 if (lastObjectId != -3)
-                    createUndo(lastChangedProperty, lastOldValue, lastNewValue);
+                    //createUndo(lastChangedProperty, lastOldValue, lastNewValue);
                 createUndo(observable, oldValue, newValue);
-                lastChangedProperty = observable; lastOldValue = oldValue; lastNewValue=newValue;
-                lastObjectId = MInventoryDataModel.getInstance().getCurrentSelectedId();
+                //lastObjectId = MInventoryDataModel.getInstance().getCurrentSelectedId();
             }
         } else {
             createUndo(observable, oldValue, newValue);
         }
-            /*if (Calendar.getInstance().getTimeInMillis() - waitTime < lastLoggedTimeInMillis) {
-                // If last logged time is younger -> update or create command
-                if (lastObjectId == currentSelectedId.get()) {
-                 // Update only if the object id is still the same
-                    if (lastChangedProperty == observable && undoStack.get(0) instanceof ValueChangeCommand) {
-                        // Update only ValueChangeCommands and if property is still the same
-                        updateUndo(observable, oldValue, newValue);
-                    } else { // It is not the same property or not instance of ValueChangeCommand -> Create new
-                        createUndo(observable, oldValue, newValue);
-                    }
-                }  else { // It is not the same object -> create new
-                    lastObjectId = currentSelectedId.get();
-                    createUndo(observable, oldValue, newValue);
-                }  
-            } else { // The last logged time is too old -> create new
-                createUndo(observable, oldValue, newValue);
-            }
-        } else { // undo stack empty
-            createUndo(observable, oldValue, newValue);
-        }*/
     }
     
 }

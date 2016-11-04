@@ -21,11 +21,11 @@ public class ValueChangeCommand implements Command {
     }
 
     public void undo() {
-        dataModel.setPropertyValue(property, oldValue);
+        UnRedoCtrl.setPropertyValue(property, oldValue);
     }
 
     public void redo() {
-        dataModel.setPropertyValue(property, newValue);
+        UnRedoCtrl.setPropertyValue(property, newValue);
     }
 
     public void updateRedo(Object newValue) {

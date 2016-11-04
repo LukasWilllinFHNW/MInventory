@@ -1,8 +1,8 @@
 package minventory.gui;
 
+import minventory.control.UnRedoCtrl;
 import minventory.model.MInventoryDataModel;
 import minventory.model.MInventoryPresentationModel;
-import minventory.model.UnRedoCtrl;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;

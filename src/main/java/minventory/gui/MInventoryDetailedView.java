@@ -166,14 +166,6 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
                 new BidirectionalListener(
                         this.descriptionArea.textProperty(), proxy.getDescriptionProperty()
                         , new Object[]{";"}, null, listenerShouldListen);
-                
-                new BidirectionalListener(
-                        this.typePickerEditor.valueProperty(), proxy.getTypeProperty()
-                        , new Object[]{";"}, null, listenerShouldListen);
-                
-                new BidirectionalListener(
-                        this.usageTypePickerEditor.valueProperty(), proxy.getUsageTypeProperty()
-                        , new Object[]{";"}, null, listenerShouldListen);
 
                 new BidirectionalListener(
                         this.distinctAttributeField.textProperty(), proxy.getDistinctAttributeProperty()
@@ -186,6 +178,14 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
                 new BidirectionalListener(
                         this.colorPicker.valueProperty(), proxy.getColorProperty()
                         , null, null, listenerShouldListen);
+                
+                new BidirectionalListener(
+                        this.typePickerEditor.getEditor().textProperty() , proxy.getTypeProperty()
+                        , new Object[]{";"}, null, listenerShouldListen);
+                
+                new BidirectionalListener(
+                        this.usageTypePickerEditor.getEditor().textProperty(), proxy.getUsageTypeProperty()
+                        , new Object[]{";"}, null, listenerShouldListen);
 
                 dataModel.getProxy().getLengthProperty().addListener((observable1, oldValue1, newValue1) -> {
                     this.lengthField.textProperty().setValue("" + newValue1.doubleValue());

@@ -32,7 +32,7 @@ public class RemoveCommand implements Command {
     }
 
     /**
-     * Not supportet function throws NotImplementedException
+     * Unsupported function throws NotImplementedException
      * @param oldValue can not be set
      * @throws NotImplementedException
      */
@@ -42,7 +42,7 @@ public class RemoveCommand implements Command {
     }
 
     /**
-     * Not supportet function throws NotImplementedException
+     * Unsupported function throws NotImplementedException
      * @param newValue can not be set
      * @throws NotImplementedException
      */

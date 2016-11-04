@@ -55,6 +55,30 @@ public class MInventoryDataModel {
     //DisplayProperties
     private static final BooleanProperty removeFromStorageDisabled = new SimpleBooleanProperty();
     private static final BooleanProperty lookIntoStorageDisabled = new SimpleBooleanProperty();
+    
+    // Listeners
+    private final ChangeListener<? super Number> internalIdListener = (observable, oldValue, newValue) -> {
+        MInventoryObject oldSelection = getById((int) oldValue);
+
+        if (oldSelection != null) {
+            unselect(oldSelection);
+            UnRedoCtrl.disableUndoSupport(oldSelection);
+        }
+
+        if (newValue.intValue() != -1) {
+            MInventoryObject newSelection = getById((int) newValue);
+
+            if (newSelection != null) {
+                select(newSelection);
+                UnRedoCtrl.enableUndoSupport(newSelection);
+                removeFromStorageDisabled.set((getContainingStorage(newValue.intValue()) == null));
+                lookIntoStorageDisabled.set(newSelection instanceof MInventoryItem);
+                if (newSelection instanceof MInventoryStorage)
+                    lookIntoStorageDisabled.set(((MInventoryStorage)newSelection).getContainedObjectIds().isEmpty());
+            }
+        }
+        return;        
+    };
 
     
     // --- CONSTRUCTORS ---
@@ -62,43 +86,11 @@ public class MInventoryDataModel {
 
         proxyListIsFiltered = new SimpleBooleanProperty();
 
-        currentSelectedId.addListener((observable, oldValue, newValue) -> {
-            MInventoryObject oldSelection = getById((int) oldValue);
-
-            if (oldSelection != null) {
-                unselect(oldSelection);
-                UnRedoCtrl.disableUndoSupport(oldSelection);
-            }
-
-            if (newValue.intValue() != -1) {
-                MInventoryObject newSelection = getById((int) newValue);
-
-                if (newSelection != null) {
-                    select(newSelection);
-                    UnRedoCtrl.enableUndoSupport(newSelection);
-                    removeFromStorageDisabled.set((getContainingStorage(newValue.intValue()) == null));
-                    lookIntoStorageDisabled.set(newSelection instanceof MInventoryItem);
-                    if (newSelection instanceof MInventoryStorage)
-                        lookIntoStorageDisabled.set(((MInventoryStorage)newSelection).getContainedObjectIds().isEmpty());
-                }
-            }
-            return;
-        });
-
+        currentSelectedId.addListener(internalIdListener);
+        currentSelectedId.addListener(UnRedoCtrl.objectIdListener);
     }
 
-    // --- API ---    
-    /**
-     * Sets a value for any property
-     * @param property the property of which the value should be changed
-     * @param newValue the new Value of the property
-     */
-    public void setPropertyValue(Property property, Object newValue){
-        property.removeListener(UnRedoCtrl.propertyChangeListenerForUndoSupport);
-        property.setValue(newValue);
-        property.addListener(UnRedoCtrl.propertyChangeListenerForUndoSupport);
-    }
-
+    // --- API ---
 
     // -- filter and search --
     public void noFilter(ListProperty<MInventoryObject> inList, ListProperty<MInventoryObject> toList) {
@@ -167,7 +159,7 @@ public class MInventoryDataModel {
     }
 
     /**
-     * Selects the first object in object list proxy catching all expected exceptions
+     * Selects the first object in object list catching all expected exceptions
      */
     public void exceptionSafeSelectFirst(ListProperty<MInventoryObject> fromList){
         try {

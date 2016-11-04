@@ -6,6 +6,7 @@ out/
 .metadata/
 .settings/
 .recommenders/
+bin/
 libs/
 RemoteSystemsTempFiles/
 *.log

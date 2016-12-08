@@ -317,17 +317,17 @@ public class MInventoryDetailedView extends GridPane implements ViewTemplate{
  */
 class BidirectionalListener implements ChangeListener {
 
-    private final ChangeListener from1To2;
+    private final ChangeListener listener1;
     private ChangeListener customListener;
-    private final ChangeListener from2To1;
+    private final ChangeListener listener2;
     private final Property changeable1;
     private final Property changeable2;
     private final List<Object> notAllowedValues;
     private final Map<Comparable, Comparable> checks;
-    private boolean isListening;
-    private final BooleanProperty shouldListen;
+    private final BooleanProperty isActive;
 
     public BidirectionalListener(Property property1, Property property2, Object[] notAllowedValues, Map<Comparable, Comparable> comparisonChecks, BooleanProperty shouldListen) {
+        
         if (property1 == null || property2 == null) throw new IllegalArgumentException("Property values must not be null");
 
         this.changeable1 = property1;
@@ -348,21 +348,22 @@ class BidirectionalListener implements ChangeListener {
         }
         // Check if a observable boolean variable has been set
         if (shouldListen != null) {
-            this.shouldListen = shouldListen;
+            shouldListen.set(false);
+            this.isActive = shouldListen;
         } else {
-            this.shouldListen = new SimpleBooleanProperty();
+            this.isActive = new SimpleBooleanProperty(false);
         }
 
         customListener = (observable3, oldValue3, newValue3) -> {
         };
-        from1To2 = (observable1, oldValue1, newValue1) -> {
+        listener1 = (observable1, oldValue1, newValue1) -> {
             changed(property1, oldValue1, newValue1);
         };
-        from2To1 = (observable2, oldValue2, newValue2) -> {
-            changed2(observable2, oldValue2, newValue2);
+        listener2 = (observable2, oldValue2, newValue2) -> {
+            changedSecond(observable2, oldValue2, newValue2);
         };
 
-        this.shouldListen.addListener((observable, oldValue, newValue) -> {
+        this.isActive.addListener((observable, oldValue, newValue) -> {
             try {
                 if (newValue) {
                     startListening();
@@ -373,11 +374,8 @@ class BidirectionalListener implements ChangeListener {
                 System.out.println(ise);
             }
         });
-
-        property1.addListener(from1To2);
-        property1.addListener(customListener);
-        property2.addListener(from2To1);
-        isListening = true;
+        
+        isActive.set(true);;
     }
 
     @Override
@@ -410,7 +408,7 @@ class BidirectionalListener implements ChangeListener {
         }
     }
 
-    public void changed2(ObservableValue observable, Object oldValue, Object newValue){
+    public void changedSecond(ObservableValue observable, Object oldValue, Object newValue){
         if(newValue != null) {
             try {
                 if (!notAllowedValues.isEmpty()) {
@@ -440,29 +438,19 @@ class BidirectionalListener implements ChangeListener {
     }
 
     public void stopListening() {
-        if (isListening) {
-            changeable1.removeListener(from1To2);
+            changeable1.removeListener(listener1);
             changeable1.removeListener(customListener);
-            changeable2.removeListener(from2To1);
-            isListening = false;
-        } else {
-            throw new IllegalStateException("Already listening");
-        }
+            changeable2.removeListener(listener2);
     }
 
     public void startListening() {
-        if (!isListening) {
-            changeable1.addListener(from1To2);
+            changeable1.addListener(listener1);
             changeable1.removeListener(customListener);
-            changeable2.addListener(from2To1);
-            isListening = true;
-        } else {
-            throw new IllegalStateException("AlreadyListening");
-        }
+            changeable2.addListener(listener2);
     }
 
-    public boolean isListening() {
-        return isListening;
+    public boolean isActive() {
+        return isActive.get();
     }
 
     /**

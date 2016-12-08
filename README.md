@@ -5,7 +5,7 @@ A sort-your-stuff application
 
 The app starts with no data at all when you first start it.
 You can add new items and storages and add pictures to them.
-Also bew aware that the application does support multiple users meaning every user can have different contents.
+The application does support multiple users under MacOs and Windows.
 
 ## Versions
 

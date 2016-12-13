@@ -9,7 +9,14 @@ The application does support multiple users under MacOs and Windows.
 
 ## Versions
 
+### MInventory_0.6.2
+
+#### Changes
+1. Fixed save file corruption (due to saving new line from description property)
+
 ### MInventory_0.6.1
+
+#### Changes
 1. Fixed falsy Undo /Redo feature
 2. Better documentation by rewording and adding comments
 3. Properties now stored in a List instead of single properties (Makes adding new properties, saving and loading easier in the future)

@@ -326,7 +326,8 @@ class BidirectionalListener implements ChangeListener {
     private final Map<Comparable, Comparable> checks;
     private final BooleanProperty isActive;
 
-    public BidirectionalListener(Property property1, Property property2, Object[] notAllowedValues, Map<Comparable, Comparable> comparisonChecks, BooleanProperty shouldListen) {
+    public BidirectionalListener(Property property1, Property property2, Object[] unallowedValues, 
+            Map<Comparable, Comparable> comparisonChecks, BooleanProperty shouldListen) {
         
         if (property1 == null || property2 == null) throw new IllegalArgumentException("Property values must not be null");
 
@@ -335,18 +336,20 @@ class BidirectionalListener implements ChangeListener {
 
         // Check if not allowed values have been set
         this.notAllowedValues = new ArrayList<>();
-        if (notAllowedValues != null) {
-            for (int i = 0; i < notAllowedValues.length; ++i) {
-                this.notAllowedValues.add(notAllowedValues[i]);
+        if (unallowedValues != null) {
+            for (int i = 0; i < unallowedValues.length; ++i) {
+                this.notAllowedValues.add(unallowedValues[i]);
             }
         }
+        
         // Check if any comparison checks have been set
         if (comparisonChecks == null) {
             this.checks = new HashMap<>();
         } else {
             this.checks = comparisonChecks;
         }
-        // Check if a observable boolean variable has been set
+        
+        // initialize isActive with value false
         if (shouldListen != null) {
             shouldListen.set(false);
             this.isActive = shouldListen;
@@ -374,8 +377,8 @@ class BidirectionalListener implements ChangeListener {
                 System.out.println(ise);
             }
         });
-        
-        isActive.set(true);;
+        // set isActive to true to trigger the startListening() function
+        isActive.set(true);
     }
 
     @Override
@@ -454,12 +457,11 @@ class BidirectionalListener implements ChangeListener {
     }
 
     /**
-     * Changes behaviour of listener from changeable1 to changeable2
-     * not allowed values are no more applied
-     * comparison checks are no more applied
+     * Sets a custom listener for property1
+     * the changed function wont check for unallowedValues or do any comparison checks
      * @param customListener customListener
      */
-    public void setCustomListener(ChangeListener customListener) {
+    /*public void setCustomListener(ChangeListener customListener) {
         customListener = customListener;
-    }
+    }*/
 }

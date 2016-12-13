@@ -95,7 +95,12 @@ public abstract class MInventoryObject {
 
         info.append(this.id + ";");
         info.append(this.getName() + ";");
-        info.append(this.getDescription() + ";");
+        
+        String saveDescr = this.getDescription().substring(0, this.getDescription().length());
+        char newLine = 10; char carriageReturn = 13; char bell = 7;
+        saveDescr = saveDescr.replace(newLine, bell);
+        info.append(saveDescr + ";");
+        
         info.append(this.type.getType() + ";");
         info.append(this.type.getUsageType() + ";");
         info.append(this.getImageFileExtension() + ";");

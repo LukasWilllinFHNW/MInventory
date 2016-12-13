@@ -249,6 +249,11 @@ public class MInventoryFilesController {
 		}
 	}
 	
+	/**
+	 * Checks if the location to save the files in is correct
+	 * If the folder structure is incorrect it attempts to rebuild the structure
+	 * This method should only return false when the app is started the first time.
+	 */
 	private void checkSaveLocation() {
 	    // Define Files and Folders needed for saving
         File save = new File(getPath(csv.CSV_OBJECTS_FILE, filesInSameFolder).toString());
@@ -296,8 +301,8 @@ public class MInventoryFilesController {
 	// --- HELPERS ---
 
 	/**
-	 * Creates a path appends a file or folder name to it The path can be either
-	 * user.home or the same folder like the app is System independent
+	 * Creates a path appends a file or folder name to it. The path can be either
+	 * user.home or the same folder as the app
 	 * 
 	 * @param fileName
 	 *            the file or folder name to append
@@ -329,8 +334,8 @@ public class MInventoryFilesController {
 	}
 
 	/**
-	 * Creates an array from a path containing the folders in order Crops the
-	 * file name when contains file name true
+	 * Creates an array from a path containing the folders in order.
+	 * Crops the file name when contains file name true
 	 * 
 	 * @param path
 	 *            the path to be decomposed
@@ -420,7 +425,9 @@ public class MInventoryFilesController {
 		
 		String description; // Loading the description takes 1 of 30
 		try {
+		    char newLine = 10; char carriageReturn = 13; char bell = 7;
 			description = arguments[csv.DESCRIPTION];
+			description= description.replace(bell, newLine);
 		} catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println(e.getMessage() + "\n" + e.getStackTrace().toString() + "\n" + e.getCause());
 			description = new String("");

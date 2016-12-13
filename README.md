@@ -9,7 +9,19 @@ The application does support multiple users under MacOs and Windows.
 
 ## Versions
 
-### MInventory_0.5
+### MInventory_0.6.1
+1. Fixed falsy Undo /Redo feature
+2. Better documentation by rewording and adding comments
+3. Properties now stored in a List instead of single properties (Makes adding new properties, saving and loading easier in the future)
+
+### MInventory_0.6.0
+
+#### Changes
+1. Added Undo and Redo feature
+2. Refactoring
+4. Bug Fixes
+
+### MInventory_0.5.0
 
 #### Changes
 1. Added filter and search feature
@@ -17,27 +29,27 @@ The application does support multiple users under MacOs and Windows.
 3. Bug fixes
 4. Implemented all attribute variables in MInventoryObject
 
-### MInventory_0.4
+### MInventory_0.4.0
 
 #### Changes
 1. Added drag and drop support to add images from types .jpg .png
 2. Refactoring of code
 3. Bug fix
 
-### MInventory_0.3
+### MInventory_0.3.0
 
 #### Changes
 1. Added user data seperation: Each User can store different data
 2. Refactoring of Code
 
-### MInventory_0.2
+### MInventory_0.2.0
 
 #### Changes
 1. Added basic tasks for object creation (add, save, cancel operation)
 2. Refactoring of Code
 
 
-### MInventory_0.1 
+### MInventory_0.1.0
 
 #### Changes:
 1. Basic Project Structure

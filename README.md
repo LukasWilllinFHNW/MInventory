@@ -43,7 +43,7 @@ The application does support multiple users under MacOs and Windows.
 2. Refactoring of code
 3. Bug fix
 
-### MInventory_3.0.0
+### MInventory_3.0.0 - this is the first usable release
 
 #### Changes
 1. Added user data seperation: Each User can store different data in user.home
